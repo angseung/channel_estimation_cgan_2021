@@ -6,8 +6,8 @@ mod_type = 2;               % 변조 차수 ex) 1 - BPSK, 2 - QPSK, 4 - 16QAM, 6
 rx_node = 32;               % 수신기의 수 (수신기의 안테나는 1개)
 tx_ant = 64;                % 기지국의 안테나 수
 snr = 10;                   % 전송 채널 SNR 범위
-path = 10;
-scatter = 12;
+path = 3;
+scatter = 2;
 % iter = 300;                 % 전송 반복 횟수
 pilot_len = 8;
 num_datasets = 1548 + 664;
@@ -100,4 +100,4 @@ output_da_test = CH(numTrSamples + 1 : end, :, :, :);
 %% Save Generated Data to mat v7.3 hd5 file...
 formatSpec = "Gan_%d_dBOutdoorSCM_%dpath_%dscatter.mat";
 fname = sprintf(formatSpec, snr, path, scatter);
-save("GAN_Data\" + fname,'input_da','output_da','input_da_test','output_da_test','-v7.3')
+save("Gan_Data\" + fname,'input_da','output_da','input_da_test','output_da_test','-v7.3')
