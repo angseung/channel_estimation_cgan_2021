@@ -175,13 +175,13 @@ def train(epochs, l2_weight):
 # l2_weight_list = [0.001, 0.01, 0.1, 1, 10]
 # lr_gen_list = [0.002, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3]
 # beta1_list = [0.5]
-l2_weight_list = [1.0]
+l2_weight_list = [10.0]
 lr_gen_list = [0.001]
 beta1_list = [0.9]
 
 # lr_gen_list = [0.0011];
 # beta1_list = [0.8]
-epochs = 10
+epochs = 20
 fig_num = 0
 nm_list = np.zeros((len(beta1_list) * len(beta1_list), epochs + 2))
 nm_val_list = [];
@@ -215,7 +215,7 @@ for l2_weight in l2_weight_list:
                 discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-10)
 
             else:
-                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter.mat"
+                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_10path_20scatter.mat"
                 # optimizer
                 # lr_gen = 0.001
                 lr_dis = 2e-5
