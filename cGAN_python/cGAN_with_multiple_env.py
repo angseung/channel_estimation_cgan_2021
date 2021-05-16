@@ -215,7 +215,7 @@ for l2_weight in l2_weight_list:
                 discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-10)
 
             else:
-                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_10path_20scatter.mat"
+                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter.mat"
                 # optimizer
                 # lr_gen = 0.001
                 lr_dis = 2e-5

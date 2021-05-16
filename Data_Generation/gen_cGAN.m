@@ -6,12 +6,12 @@ mod_type = 2;               % 변조 차수 ex) 1 - BPSK, 2 - QPSK, 4 - 16QAM, 6
 rx_node = 32;               % 수신기의 수 (수신기의 안테나는 1개)
 tx_ant = 64;                % 기지국의 안테나 수
 snr = 10;                   % 전송 채널 SNR 범위
-path = 10;
-scatter = 20;
+path = 3;
+scatter = 2;
 % iter = 300;                 % 전송 반복 횟수
 pilot_len = 8;
-num_datasets = 1548 + 664;
-% num_datasets = 100;
+% num_datasets = 1548 + 664;
+num_datasets = 8000;
 
 % 기본 파라미터 설정
 model = SCM();
