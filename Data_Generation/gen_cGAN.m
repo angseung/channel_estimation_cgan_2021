@@ -12,6 +12,7 @@ scatter = 2;
 pilot_len = 8;
 num_datasets = 1548 + 664;
 % num_datasets = 100;
+% num_datasets = 5000
 
 % 기본 파라미터 설정
 model = SCM();
@@ -46,6 +47,11 @@ t_H = zeros(path, N_rx * N_d, N_tx);
 CH = zeros(num_datasets, N_tx, N_s, 2);
 Y = zeros(num_datasets, N_tx, pilot_len, 2);
 
+%% Generating pilot 
+pilot_t = uniformPilotsGen(pilot_len);
+pilot_t = pilot_t{1,1};
+pilot = repmat(pilot_t,[1 rx_node])';
+
 %% 반복 시작
 for curr_dat = 1 : num_datasets
 %     fprintf("Generating %04dth data...\n", curr_dat)
@@ -62,8 +68,8 @@ for curr_dat = 1 : num_datasets
     CH(curr_dat, :, :, 2) = imag(H);
 
     % 데이터 생성
-    pilot = cdm_gen_freq(pilot_len + 1, rx_node);
-    pilot = pilot(:, 1 : pilot_len);
+%     pilot = cdm_gen_freq(pilot_len + 1, rx_node);
+%     pilot = pilot(:, 1 : pilot_len);
 
     % Received signal at RX
     y = H * pilot;

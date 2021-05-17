@@ -175,7 +175,7 @@ def train(epochs, l2_weight):
 # l2_weight_list = [0.001, 0.01, 0.1, 1, 10]
 # lr_gen_list = [0.002, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3]
 # beta1_list = [0.5]
-l2_weight_list = [1.0]
+l2_weight_list = [10.0]
 lr_gen_list = [0.001]
 beta1_list = [0.9]
 
