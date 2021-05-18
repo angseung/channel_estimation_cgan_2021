@@ -10,9 +10,9 @@ path = 3;
 scatter = 2;
 % iter = 300;                 % 전송 반복 횟수
 pilot_len = 8;
-% num_datasets = 1548 + 664;
+num_datasets = 1548 + 664;
 % num_datasets = 100;
-num_datasets = 5000
+% num_datasets = 5000
 
 % 기본 파라미터 설정
 model = SCM();
@@ -88,19 +88,19 @@ for curr_dat = 1 : num_datasets
 end
 
 %% Quantization Received Y
-Y_signed = zeros(size(Y));
-Y_signed(:, :, :, 1) = sign(Y(:, :, :, 1));
-Y_signed(:, :, :, 2) = sign(Y(:, :, :, 2));
+% Y_signed = zeros(size(Y));
+% Y_signed(:, :, :, 1) = sign(Y(:, :, :, 1));
+% Y_signed(:, :, :, 2) = sign(Y(:, :, :, 2));
 
 %% Split data for training
 trRatio = 0.7;
 numTrSamples = floor(trRatio * num_datasets);
 numValSamples = num_datasets - numTrSamples;
 
-input_da = Y_signed(1 : numTrSamples, :, :, :);
+input_da = Y(1 : numTrSamples, :, :, :);
 output_da = CH(1 : numTrSamples, :, :, :);
 
-input_da_test = Y_signed(numTrSamples + 1 : end, : , : ,:);
+input_da_test = Y(numTrSamples + 1 : end, : , : ,:);
 output_da_test = CH(numTrSamples + 1 : end, :, :, :);
 
 %% Save Generated Data to mat v7.3 hd5 file...
