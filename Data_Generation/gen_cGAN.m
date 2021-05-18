@@ -10,9 +10,9 @@ path = 3;
 scatter = 2;
 % iter = 300;                 % 전송 반복 횟수
 pilot_len = 8;
-% num_datasets = 1548 + 664;
+num_datasets = 1548 + 664;
 % num_datasets = 100;
-num_datasets = 5000
+% num_datasets = 5000
 
 % 기본 파라미터 설정
 model = SCM();

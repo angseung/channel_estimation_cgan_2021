@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 config = tf.compat.v1.ConfigProto()
 config.gpu_options.allow_growth = True
-tf.compat.v1.enable_eager_execution(config=config)
+tf.compat.v1.enable_eager_execution(config = config)
 layers = tf.keras.layers
 
 """
@@ -16,7 +16,10 @@ There are skip connections between the encoder and decoder (as in U-Net).
 class EncoderLayer(tf.keras.Model):
     def __init__(self, filters, kernel_size, strides_s = 2, apply_batchnorm=True, add = False, padding_s = 'same'):
         super(EncoderLayer, self).__init__()
-        initializer = tf.random_normal_initializer(mean=0., stddev=0.02)
+
+        initializer = tf.keras.initializers.Orthogonal(gain = 1.0, seed = None)
+        # initializer = tf.random_normal_initializer(mean=0., stddev=0.02)
+
         conv = layers.Conv2D(filters=filters, kernel_size=kernel_size, strides=strides_s,
                              padding=padding_s, kernel_initializer=initializer, use_bias=False)
         ac = layers.LeakyReLU()
@@ -36,7 +39,10 @@ class EncoderLayer(tf.keras.Model):
 class DecoderLayer(tf.keras.Model):
     def __init__(self, filters, kernel_size, strides_s = 2, apply_dropout=False, add = False):
         super(DecoderLayer, self).__init__()
-        initializer = tf.random_normal_initializer(mean=0., stddev=0.02)
+
+        initializer = tf.keras.initializers.Orthogonal(gain = 1.0, seed = None)
+        # initializer = tf.random_normal_initializer(mean=0., stddev=0.02)
+
         dconv = layers.Conv2DTranspose(filters=filters, kernel_size=kernel_size, strides=strides_s,
                                        padding='same', kernel_initializer=initializer, use_bias=False)
         bn = layers.BatchNormalization()
@@ -82,8 +88,8 @@ class Generator(tf.keras.Model):
         decoder_layer_4 = DecoderLayer(filters=64*4, kernel_size=4)   
         self.decoder_layers = [decoder_layer_1, decoder_layer_2, decoder_layer_3, decoder_layer_4]
 
-       
-        initializer = tf.random_normal_initializer(mean=0., stddev=0.02)
+        initializer = tf.keras.initializers.Orthogonal(gain=1.0, seed=None)
+        # initializer = tf.random_normal_initializer(mean=0., stddev=0.02)
         self.last = layers.Conv2DTranspose(filters=2, kernel_size=4, strides=2, padding='same',
                                            kernel_initializer=initializer, activation='tanh')
 

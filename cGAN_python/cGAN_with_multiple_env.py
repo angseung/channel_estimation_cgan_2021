@@ -7,6 +7,7 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from GAN.cGANGenerator import Generator
 from GAN.cGANDiscriminator import Discriminator
+from GAN.cGANLoss import generator_loss, generator_loss_custom, discriminator_loss_custom, discriminator_loss
 from GAN.data_preprocess import load_image_train, load_image_test, load_image_test_y
 from tempfile import TemporaryFile
 from scipy.io import loadmat, savemat
@@ -23,58 +24,6 @@ config = tf.compat.v1.ConfigProto()
 config.gpu_options.allow_growth = True
 tf.compat.v1.enable_eager_execution(config=config)
 layers = tf.keras.layers
-
-"""
-Discriminator loss:
-The discriminator loss function takes 2 inputs; real images, generated images
-real_loss is a sigmoid cross entropy loss of the real images and an array of ones(since the real images)
-generated_loss is a sigmoid cross entropy loss of the generated images and an array of zeros(since the fake images)
-Then the total_loss is the sum of real_loss and the generated_loss
-
-Generator loss:
-It is a sigmoid cross entropy loss of the generated images and an array of ones.
-The paper also includes L2 loss between the generated image and the target image.
-This allows the generated image to become structurally similar to the target image.
-The formula to calculate the total generator loss = gan_loss + LAMBDA * l2_loss, where LAMBDA = 100. 
-This value was decided by the authors of the paper.
-"""
-
-
-def discriminator_loss(disc_real_output, disc_generated_output):
-    """disc_real_output = [real_target]
-       disc_generated_output = [generated_target]
-    """
-    # log(DIS)
-    real_loss = tf.nn.sigmoid_cross_entropy_with_logits(
-        labels=tf.ones_like(disc_real_output), logits=disc_real_output)  # label=1
-
-    # log(1-DIS(GEN))
-    generated_loss = tf.nn.sigmoid_cross_entropy_with_logits(
-        labels=tf.zeros_like(disc_generated_output), logits=disc_generated_output)  # label=0
-
-    total_disc_loss = tf.reduce_mean(real_loss) + tf.reduce_mean(generated_loss)
-
-    return total_disc_loss
-
-
-def generator_loss(disc_generated_output, gen_output, target, l2_weight=100):
-    """
-        disc_generated_output: output of Discriminator when input is from Generator
-        gen_output:  output of Generator (i.e., estimated H)
-        target:  target image
-        l2_weight: weight of L2 loss
-    """
-    # GAN loss
-    # gen_loss = log(DIS(GEN))
-    # total_loss = total_loss + l2_loss
-    gen_loss = tf.nn.sigmoid_cross_entropy_with_logits(
-        labels=tf.ones_like(disc_generated_output), logits=disc_generated_output)
-
-    # L2 loss
-    l2_loss = tf.reduce_mean(tf.abs(target - gen_output))  # loss with target...
-    total_gen_loss = tf.reduce_mean(gen_loss) + l2_weight * l2_loss  ## Type : tf.tensor()
-    return total_gen_loss
-
 
 def generated_image(model, test_input, tar, t=0):
     """Dispaly  the results of Generator"""
@@ -93,6 +42,30 @@ def generated_image(model, test_input, tar, t=0):
     # fig_map.savefig(os.path.join("generated_img", "img_"+str(t)+".png"))
 
 
+# @tf.function
+def train_step_custom(input_image, target, l2_weight):
+    with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
+        gen_output = generator(input_image)  # input -> generated_target
+        disc_real_output = discriminator(target)  # [input, target] -> disc output
+        disc_generated_output = discriminator(gen_output)  # [input, generated_target] -> disc output
+        # print("*", gen_output.shape, disc_real_output.shape, disc_generated_output.shape)
+
+        # calculate loss
+        gen_loss = generator_loss_custom(disc_generated_output, gen_output, target, l2_weight)  # gen loss
+        disc_loss = discriminator_loss_custom(disc_real_output, disc_generated_output)  # disc loss
+
+    # gradient
+    generator_gradient = gen_tape.gradient(gen_loss, generator.trainable_variables)
+    discriminator_gradient = disc_tape.gradient(disc_loss, discriminator.trainable_variables)
+
+    # apply gradient
+    generator_optimizer.apply_gradients(zip(generator_gradient, generator.trainable_variables))
+    discriminator_optimizer.apply_gradients(zip(discriminator_gradient, discriminator.trainable_variables))
+
+    return gen_loss, disc_loss
+
+
+# @tf.function
 def train_step(input_image, target, l2_weight):
     with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
         gen_output = generator(input_image)  # input -> generated_target
@@ -119,6 +92,7 @@ def train(epochs, l2_weight):
     ep = []
     start_time = datetime.datetime.now()
     print(os.getcwd())
+
     for epoch in range(epochs):
         print("-----\nEPOCH:", epoch)
         # train
@@ -127,8 +101,17 @@ def train(epochs, l2_weight):
             # load_image_train : yields one H and Y...
             elapsed_time = datetime.datetime.now() - start_time
             gen_loss, disc_loss = train_step(input_image, target, l2_weight)
-            print("B/E:", bi, '/', epoch, ", Generator loss:", gen_loss.numpy(), ", Discriminator loss:",
-                  disc_loss.numpy(), ', time:', elapsed_time)
+
+            is_nan = (tf.math.is_nan(gen_loss)) or (tf.math.is_nan(disc_loss))
+
+            if (is_nan):
+                print("nan condition detected... skip this loop...")
+                break
+
+            else:
+                print("B/E:", bi, '/', epoch, ", Generator loss:", gen_loss.numpy(), ", Discriminator loss:",
+                      disc_loss.numpy(), ', time:', elapsed_time)
+
         # generated and see the progress
         for bii, (tar, inp) in enumerate(load_image_test(path)):
             if bii == 100:
@@ -168,12 +151,12 @@ def train(epochs, l2_weight):
         # plt.ylabel('NMSE')
         # plt.show();
 
-    return nm, ep
+    return nm, ep, is_nan
 
 ## Main Script Start...
 
 # l2_weight_list = [0.001, 0.01, 0.1, 1, 10]
-lr_gen_list = [0.002, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3]
+lr_gen_list = [0.001, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3]
 # beta1_list = [0.5]
 l2_weight_list = [0.001]
 # lr_gen_list = [0.001]
@@ -181,7 +164,7 @@ beta1_list = [0.9, 0.8, 0.7]
 
 # lr_gen_list = [0.0011];
 # beta1_list = [0.8]
-epochs = 20
+epochs = 10
 fig_num = 0
 nm_list = np.zeros((len(beta1_list) * len(beta1_list), epochs + 2))
 nm_val_list = [];
@@ -224,7 +207,12 @@ for l2_weight in l2_weight_list:
                 discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-9)
 
             # train
-            nm, ep = train(epochs=epochs, l2_weight=l2_weight)
+            nm, ep, is_nan = train(epochs=epochs, l2_weight=l2_weight)
+
+            if (is_nan):
+                print("nan detected... skip for this params...")
+                continue
+
             nm_val_list.append(nm)
 
             fig_nmse = plt.figure(fig_num)
@@ -241,7 +229,7 @@ for l2_weight in l2_weight_list:
 
             plt.xlabel('Epoch')
             plt.ylabel('NMSE (dB)')
-            plt.title("Epoch - NMSE Score, [lr : %.6f] [beta1 : %.3f], [l2_weight : %.3f]"
+            plt.title("Epoch - NMSE Score, [lr : %.6f] [beta1 : %.3f], [l2_weight : %.6f]"
                       % (lr_gen, beta1, l2_weight))
             plt.grid(True)
             plt.show()
