@@ -60,9 +60,9 @@ Y_noise = zeros(length(DeepMIMO_dataset{1}.user),bs_ant,pilot_l);
 Y_sign = zeros(length(DeepMIMO_dataset{1}.user),bs_ant,pilot_l,2);
 
 for i = 1:length(DeepMIMO_dataset{1}.user)
-channels(i,:,:) = normalize(DeepMIMO_dataset{1}.user{i}.channel,'scale');%%
-Y(i,:,:) = DeepMIMO_dataset{1}.user{i}.channel*pilot_user;
-Y_noise(i,:,:) = awgn(Y(i,:,:),snr,'measured'); 
+    channels(i,:,:) = normalize(DeepMIMO_dataset{1}.user{i}.channel,'scale');%%
+    Y(i,:,:) = DeepMIMO_dataset{1}.user{i}.channel*pilot_user;
+    Y_noise(i,:,:) = awgn(Y(i,:,:),snr,'measured'); 
 end
 
 

@@ -156,7 +156,7 @@ def train(epochs, l2_weight):
 ## Main Script Start...
 
 # l2_weight_list = [0.001, 0.01, 0.1, 1, 10]
-lr_gen_list = [0.001, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3]
+lr_gen_list = [1e-7, 1e-6, 1e-5, 1e-4, 1e-3]
 # beta1_list = [0.5]
 l2_weight_list = [0.001]
 # lr_gen_list = [0.001]
@@ -200,14 +200,12 @@ for l2_weight in l2_weight_list:
             else:
                 path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter.mat"
                 # optimizer
-                # lr_gen = 0.001
                 lr_dis = 2e-5
-                # beta1 = 0.9
-                generator_optimizer = tf.compat.v1.train.AdamOptimizer(lr_gen, beta1=beta1)
+                generator_optimizer = tf.compat.v1.train.AdamOptimizer(lr_gen, beta1 = beta1)
                 discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-9)
 
             # train
-            nm, ep, is_nan = train(epochs=epochs, l2_weight=l2_weight)
+            nm, ep, is_nan = train(epochs=epochs, l2_weight =l2_weight)
 
             if (is_nan):
                 print("nan detected... skip for this params...")

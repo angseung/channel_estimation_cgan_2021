@@ -64,8 +64,6 @@ for curr_dat = 1 : num_datasets
 
     t_H(:,:,:) = r_H(:,1,:,:); % (path, scatterers, RX_tot, TX)
     H = squeeze(sum(t_H, 1)).';
-    CH(curr_dat, :, :, 1) = real(H);
-    CH(curr_dat, :, :, 2) = imag(H);
 
     % 데이터 생성
 %     pilot = cdm_gen_freq(pilot_len + 1, rx_node);
