@@ -137,5 +137,6 @@ cGAN_python/nmse_score_old
 /cGAN_python/GAN/__pycache__/
 /Data_Generation/RayTracing Scenarios
 /Data_Generation/Gan_Data
+*.asv
 
 
