@@ -154,13 +154,12 @@ def train(epochs, l2_weight):
     return nm, ep, is_nan
 
 ## Main Script Start...
-
-# l2_weight_list = [0.001, 0.01, 0.1, 1, 10]
+l2_weight_list = [0.001, 0.01, 0.1, 1, 10, 100]
 lr_gen_list = [1e-7, 1e-6, 1e-5, 1e-4, 1e-3]
 # beta1_list = [0.5]
-l2_weight_list = [0.001]
+# l2_weight_list = [0.001]
 # lr_gen_list = [0.001]
-beta1_list = [0.9, 0.8, 0.7]
+beta1_list = [0.9, 0.8, 0.7, 0.6, 0.5]
 
 # lr_gen_list = [0.0011];
 # beta1_list = [0.8]
@@ -227,7 +226,7 @@ for l2_weight in l2_weight_list:
 
             plt.xlabel('Epoch')
             plt.ylabel('NMSE (dB)')
-            plt.title("Epoch - NMSE Score, [lr : %.6f] [beta1 : %.3f], [l2_weight : %.6f]"
+            plt.title("Epoch - NMSE Score, [lr : %.8f] [beta1 : %.3f], [l2_weight : %.8f]"
                       % (lr_gen, beta1, l2_weight))
             plt.grid(True)
             plt.show()

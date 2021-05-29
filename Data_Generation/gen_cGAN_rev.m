@@ -11,7 +11,7 @@ path = 3;
 scatter = 2;
 % iter = 300;               % 전송 반복 횟수
 pilot_len = 8;
-num_datasets = 1548 + 664;
+num_datasets = 12000;
 % num_datasets = 100;
 % num_datasets = 5000
 
@@ -20,7 +20,7 @@ model = SCM();
 model.n_path = path;
 model.n_mray = scatter;
 model.fc = 2.5e9;
-model.fs = model.fc / 40;
+% model.fs = model.fc / 40;
 cp_len = fft_len / 4;
 % data_len = fft_len * mod_type;
 
@@ -75,7 +75,7 @@ for curr_dat = 1 : num_datasets
     [y, ~] = awgn_noise(y, snr);
     
     % Debug ONLY...
-    zero_test = y(y == 0);
+    zero_test = y(y == 0.0);
     assert(isempty(zero_test))
     
     %% Store current data to buffer
@@ -103,6 +103,6 @@ input_da_test = Y_signed(numTrSamples + 1 : end, : , : ,:);
 output_da_test = CH(numTrSamples + 1 : end, :, :, :);
 
 %% Save Generated Data to mat v7.3 hd5 file...
-formatSpec = "Gan_%d_dBOutdoorSCM_%dpath_%dscatter.mat";
+formatSpec = "Gan_%d_dBOutdoorSCM_%dpath_%dscatter_210529.mat";
 fname = sprintf(formatSpec, snr, path, scatter);
 save("Gan_Data\" + fname,'input_da','output_da','input_da_test','output_da_test','-v7.3')

@@ -7,7 +7,7 @@ rx_node = 1;                % 수신기의 수 (수신기의 안테나는 1개)
 tx_ant = 32;                % 기지국의 안테나 수
 rx_ant = 64;
 snr = 10;                   % 전송 채널 SNR 범위
-path = 2;
+path = 3;
 scatter = 2;
 pilot_len = 8;
 num_datasets = 1000;
@@ -42,6 +42,9 @@ t_H = zeros(path, N_rx * N_d, N_tx);
 DoF_dat = zeros(num_datasets, 3);
 G_dat = zeros(num_datasets, 3);
 
+sel_tx = 10;
+sel_rx = 20;
+
 % For Sparse...
 for curr_dat = 1 : num_datasets
     
@@ -52,7 +55,7 @@ for curr_dat = 1 : num_datasets
     end
 
     t_H(:,:,:) = r_H(:,1,:,:); % (path, time, RX_tot, TX)
-    h = t_H(:, 1, 1);
+    h = t_H(:, sel_rx, sel_tx);
     
     DoF = rank(h * h');
     G = get_gini_index(h);
@@ -112,7 +115,7 @@ for curr_dat = 1 : num_datasets
 
     t_H(:,:,:) = r_H(:,1,:,:); % (path, time, RX_tot, TX)
 %     h = mean(t_H, [2, 3]);
-    h = t_H(:, 1, 1);
+    h = t_H(:, sel_rx, sel_tx);
     
     DoF = rank(h * h');
     G = get_gini_index(h);
@@ -139,7 +142,7 @@ model = SCM();
 model.n_path = path;
 model.n_mray = scatter;
 model.fc = 800e6;
-model.fs = model.fc / 40;
+% model.fs = model.fc / 40;
 model.los = 1;
 cp_len = fft_len / 4;
 
@@ -173,7 +176,7 @@ for curr_dat = 1 : num_datasets
 
     t_H(:,:,:) = r_H(:,1,:,:); % (path, time, RX_tot, TX)
 %     h = mean(t_H, [2, 3]);
-    h = t_H(:, 1, 1);
+    h = t_H(:, sel_rx, sel_tx);
     
     DoF = rank(h * h');
     G = get_gini_index(h);
