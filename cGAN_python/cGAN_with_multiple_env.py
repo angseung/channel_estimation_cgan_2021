@@ -197,7 +197,7 @@ for l2_weight in l2_weight_list:
                 discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-10)
 
             else:
-                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter.mat"
+                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_210529.mat"
                 # optimizer
                 lr_dis = 2e-5
                 generator_optimizer = tf.compat.v1.train.AdamOptimizer(lr_gen, beta1 = beta1)
@@ -232,6 +232,7 @@ for l2_weight in l2_weight_list:
             plt.show()
 
             timestr = time.strftime("%Y%m%d_%H%M%S")
-            fig_nmse.savefig("fig_temp/nmse_score_%05d_%s" % (fig_num, timestr))
+            # fig_nmse.savefig("fig_temp/nmse_score_%05d_%s" % (fig_num, timestr))
+            fig_nmse.savefig("fig_temp/nmse_score_%s" % (timestr))
 
             fig_num = fig_num + 1
