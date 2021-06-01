@@ -64,7 +64,7 @@ def generator_loss_custom(disc_generated_output, gen_output, target, l2_weight =
     return total_gen_loss
 
 
-def discriminator_loss(disc_real_output, disc_generated_output):
+def discriminator_loss(disc_real_output, disc_generated_output, l2_weight = 0.001, L2_OPT = False):
     """disc_real_output = [real_target]
        disc_generated_output = [generated_target]
     """
@@ -76,7 +76,10 @@ def discriminator_loss(disc_real_output, disc_generated_output):
     generated_loss = tf.nn.sigmoid_cross_entropy_with_logits(
         labels=tf.zeros_like(disc_generated_output), logits=disc_generated_output)  # label=0
 
-    total_disc_loss = tf.reduce_mean(real_loss) + tf.reduce_mean(generated_loss)
+    # L2 loss
+    l2_loss = tf.reduce_mean(tf.abs(disc_real_output - disc_generated_output))  # loss with target...
+
+    total_disc_loss = tf.reduce_mean(real_loss) + tf.reduce_mean(generated_loss) + l2_weight * l2_loss * L2_OPT
 
     return total_disc_loss
 

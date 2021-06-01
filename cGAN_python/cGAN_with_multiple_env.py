@@ -66,7 +66,7 @@ def train_step_custom(input_image, target, l2_weight):
 
 
 # @tf.function
-def train_step(input_image, target, l2_weight):
+def train_step(input_image, target, l2_weight, DISC_L2_OPT = False):
     with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
         gen_output = generator(input_image)  # input -> generated_target
         disc_real_output = discriminator(target)  # [input, target] -> disc output
@@ -75,7 +75,8 @@ def train_step(input_image, target, l2_weight):
 
         # calculate loss
         gen_loss = generator_loss(disc_generated_output, gen_output, target, l2_weight)  # gen loss
-        disc_loss = discriminator_loss(disc_real_output, disc_generated_output)  # disc loss
+        disc_loss = discriminator_loss(disc_real_output, disc_generated_output,
+                                       l2_weight = 1.0,  L2_OPT = DISC_L2_OPT)  # disc loss
 
     # gradient
     generator_gradient = gen_tape.gradient(gen_loss, generator.trainable_variables)
@@ -87,7 +88,7 @@ def train_step(input_image, target, l2_weight):
     return gen_loss, disc_loss
 
 
-def train(epochs, l2_weight):
+def train(epochs, l2_weight, DISC_L2_OPT):
     nm = []
     ep = []
     start_time = datetime.datetime.now()
@@ -100,7 +101,7 @@ def train(epochs, l2_weight):
             # bi : index of sample
             # load_image_train : yields one H and Y...
             elapsed_time = datetime.datetime.now() - start_time
-            gen_loss, disc_loss = train_step(input_image, target, l2_weight)
+            gen_loss, disc_loss = train_step(input_image, target, l2_weight, DISC_L2_OPT)
 
             is_nan = (tf.math.is_nan(gen_loss)) or (tf.math.is_nan(disc_loss))
 
@@ -114,7 +115,7 @@ def train(epochs, l2_weight):
 
         # generated and see the progress
         for bii, (tar, inp) in enumerate(load_image_test(path)):
-            if bii == 100:
+            if (bii == 100):
                 generated_image(generator, inp, tar, t=epoch + 1)
 
         # save checkpoint
@@ -167,6 +168,7 @@ epochs = 10
 fig_num = 0
 nm_list = np.zeros((len(beta1_list) * len(beta1_list), epochs + 2))
 nm_val_list = [];
+DISC_L2_OPT = True
 
 ## DATASET Option
 DATASET_CUSTUM_OPT = True
@@ -204,7 +206,7 @@ for l2_weight in l2_weight_list:
                 discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-9)
 
             # train
-            nm, ep, is_nan = train(epochs=epochs, l2_weight =l2_weight)
+            nm, ep, is_nan = train(epochs=epochs, l2_weight =l2_weight, DISC_L2_OPT = DISC_L2_OPT)
 
             if (is_nan):
                 print("nan detected... skip for this params...")
