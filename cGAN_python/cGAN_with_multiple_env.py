@@ -168,7 +168,7 @@ epochs = 10
 fig_num = 0
 nm_list = np.zeros((len(beta1_list) * len(beta1_list), epochs + 2))
 nm_val_list = [];
-DISC_L2_OPT = True
+DISC_L2_OPT = False
 
 ## DATASET Option
 DATASET_CUSTUM_OPT = True
@@ -199,7 +199,7 @@ for l2_weight in l2_weight_list:
                 discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-10)
 
             else:
-                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_210529.mat"
+                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_abs_ang_210601.mat"
                 # optimizer
                 lr_dis = 2e-5
                 generator_optimizer = tf.compat.v1.train.AdamOptimizer(lr_gen, beta1 = beta1)
