@@ -96,10 +96,12 @@ trRatio = 0.7;
 numTrSamples = floor(trRatio * num_datasets);
 numValSamples = num_datasets - numTrSamples;
 
-input_da = Y_signed(1 : numTrSamples, :, :, :);
+% input_da = Y_signed(1 : numTrSamples, :, :, :);
+input_da = Y(1 : numTrSamples, :, :, :);
 output_da = CH(1 : numTrSamples, :, :, :);
 
-input_da_test = Y_signed(numTrSamples + 1 : end, : , : ,:);
+% input_da_test = Y_signed(numTrSamples + 1 : end, : , : ,:);
+input_da_test = Y(numTrSamples + 1 : end, : , : ,:);
 output_da_test = CH(numTrSamples + 1 : end, :, :, :);
 
 %% Save Generated Data to mat v7.3 hd5 file...

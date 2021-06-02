@@ -110,8 +110,11 @@ def train(epochs, l2_weight, DISC_L2_OPT):
                 break
 
             else:
-                print("B/E:", bi, '/', epoch, ", Generator loss:", gen_loss.numpy(), ", Discriminator loss:",
-                      disc_loss.numpy(), ', time:', elapsed_time)
+                print("B/E: %05d / %02d, Gen loss: %.8f, Dis loss: %.8f, time: %s"
+                      % (bi, epoch, gen_loss.numpy().item(), disc_loss.numpy().item(),
+                         elapsed_time))
+                # print("B/E:", bi, '/', epoch, ", Generator loss:", gen_loss.numpy(), ", Discriminator loss:",
+                #       disc_loss.numpy(), ', time:', elapsed_time)
 
         # generated and see the progress
         for bii, (tar, inp) in enumerate(load_image_test(path)):
@@ -156,18 +159,18 @@ def train(epochs, l2_weight, DISC_L2_OPT):
 
 ## Main Script Start...
 l2_weight_list = [0.001, 0.01, 0.1, 1, 10, 100]
-lr_gen_list = [1e-7, 1e-6, 1e-5, 1e-4, 1e-3]
-# beta1_list = [0.5]
+lr_gen_list = [1e-6, 1e-5, 1e-4, 1e-3, 1e-7]
+beta1_list = [0.9]
 # l2_weight_list = [0.001]
 # lr_gen_list = [0.001]
-beta1_list = [0.9, 0.8, 0.7, 0.6, 0.5]
+# beta1_list = [0.9, 0.8, 0.7, 0.6, 0.5]
 
 # lr_gen_list = [0.0011];
 # beta1_list = [0.8]
-epochs = 10
+epochs = 20
 fig_num = 0
 nm_list = np.zeros((len(beta1_list) * len(beta1_list), epochs + 2))
-nm_val_list = [];
+nm_val_list = []
 DISC_L2_OPT = False
 
 ## DATASET Option
@@ -226,14 +229,15 @@ for l2_weight in l2_weight_list:
                              verticalalignment='bottom',
                              rotation=90)  # verticalalignment (top, center, bottom)
 
+            timestr = time.strftime("%Y%m%d_%H%M%S")
+            plt.text(0, 0, timestr)
+
             plt.xlabel('Epoch')
             plt.ylabel('NMSE (dB)')
             plt.title("Epoch - NMSE Score, [lr : %.8f] [beta1 : %.3f], [l2_weight : %.8f]"
                       % (lr_gen, beta1, l2_weight))
             plt.grid(True)
-            plt.show()
-
-            timestr = time.strftime("%Y%m%d_%H%M%S")
+            # plt.show()
             # fig_nmse.savefig("fig_temp/nmse_score_%05d_%s" % (fig_num, timestr))
             fig_nmse.savefig("fig_temp/nmse_score_%s" % (timestr))
 
