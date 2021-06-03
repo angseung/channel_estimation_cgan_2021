@@ -119,9 +119,9 @@ def train(epochs, l2_weight, DISC_L2_OPT):
                 #       disc_loss.numpy(), ', time:', elapsed_time)
 
         # generated and see the progress
-        for bii, (tar, inp) in enumerate(load_image_test(path)):
-            if (bii == 100):
-                generated_image(generator, inp, tar, t=epoch + 1)
+        # for bii, (tar, inp) in enumerate(load_image_test(path)):
+        #     if (bii == 100):
+        #         generated_image(generator, inp, tar, t=epoch + 1)
 
         # save checkpoint
         # if (epoch + 1) % 2 == 0:
@@ -130,11 +130,19 @@ def train(epochs, l2_weight, DISC_L2_OPT):
         # discriminator.save_weights(os.path.join(BASE_PATH, "weights/discriminator_"+str(epoch)+".h5"))
 
         realim, inpuim = load_image_test_y(path)
-        prediction = generator(inpuim)
+        test_batch_size = inpuim.shape[0]
+        nmse_dB_temp = []
 
-        error_ = np.sum((realim - prediction) ** 2, axis=None)
-        real_ = np.sum(realim ** 2, axis=None)
-        nmse_dB = 10 * np.log10(error_ / real_)
+        for TESTBAT in range(test_batch_size):
+            prediction = generator(inpuim[TESTBAT])
+
+            error_ = np.sum((realim[TESTBAT] - prediction) ** 2, axis=None)
+            real_ = np.sum(realim[TESTBAT] ** 2, axis=None)
+            nmse_dB = (10 * np.log10(error_ / real_)).item()
+            # nmse_dB = 10 * np.log10(error_ / real_)
+            nmse_dB_temp.append(nmse_dB)
+
+        nmse_dB = sum(nmse_dB_temp) / test_batch_size
         nm.append(nmse_dB)
 
         # nm.append(np.log10(fuzz.nmse(np.squeeze(realim), np.squeeze(prediction))))

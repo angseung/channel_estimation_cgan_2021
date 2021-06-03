@@ -11,7 +11,7 @@ import h5py
 import hdf5storage
 import skfuzzy as fuzz
 
-PRINT_DEBUG_OPT = True
+PRINT_DEBUG_OPT = False
 num_tx = 64
 num_rx = 32
 len_pilot = 8
