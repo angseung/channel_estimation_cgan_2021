@@ -11,9 +11,9 @@ path = 3;
 scatter = 2;
 % iter = 300;               % 전송 반복 횟수
 pilot_len = 8;
-num_datasets = 1548 + 664;
+% num_datasets = 1548 + 664;
 % num_datasets = 100;
-% num_datasets = 5000
+num_datasets = 5000;
 
 % 기본 파라미터 설정
 model = SCM();
@@ -105,6 +105,6 @@ input_da_test = Y(numTrSamples + 1 : end, : , : ,:);
 output_da_test = CH(numTrSamples + 1 : end, :, :, :);
 
 %% Save Generated Data to mat v7.3 hd5 file...
-formatSpec = "Gan_%d_dBOutdoorSCM_%dpath_%dscatter_abs_ang_210601.mat";
+formatSpec = "Gan_%d_dBOutdoorSCM_%dpath_%dscatter_abs_ang_210602.mat";
 fname = sprintf(formatSpec, snr, path, scatter);
 save("Gan_Data\" + fname,'input_da','output_da','input_da_test','output_da_test','-v7.3')

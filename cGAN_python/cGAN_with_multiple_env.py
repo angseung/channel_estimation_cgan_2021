@@ -9,6 +9,7 @@ from GAN.cGANGenerator import Generator
 from GAN.cGANDiscriminator import Discriminator
 from GAN.cGANLoss import generator_loss, generator_loss_custom, discriminator_loss_custom, discriminator_loss
 from GAN.data_preprocess import load_image_train, load_image_test, load_image_test_y
+from GAN.cGANLayers import make_generator_model, make_discriminator_model
 from tempfile import TemporaryFile
 from scipy.io import loadmat, savemat
 import datetime
@@ -184,13 +185,11 @@ for l2_weight in l2_weight_list:
             BATCH_SIZE = 1
 
             # model
-            generator = Generator()
-            discriminator = Discriminator()
+            # generator = Generator()
+            # discriminator = Discriminator()
 
-            # model summary
-            # if (fig_num is 1):
-            #     generator.summary()
-            #     discriminator.summary()
+            generator = make_generator_model()
+            discriminator = make_discriminator_model()
 
             # data path
             if (not DATASET_CUSTUM_OPT):
@@ -202,7 +201,7 @@ for l2_weight in l2_weight_list:
                 discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-10)
 
             else:
-                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_abs_ang_210601.mat"
+                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_abs_ang_210602.mat"
                 # optimizer
                 lr_dis = 2e-5
                 generator_optimizer = tf.compat.v1.train.AdamOptimizer(lr_gen, beta1 = beta1)
