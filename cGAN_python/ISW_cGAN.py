@@ -66,7 +66,7 @@ def train_step_custom(input_image, target, l2_weight):
 
 
 # @tf.function
-def train_step(input_image, target, l2_weight, DISC_L2_OPT = False):
+def train_step(bi, input_image, target, l2_weight, DISC_L2_OPT = False):
     with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
         gen_output = generator(input_image)  # input -> generated_target
         disc_real_output = discriminator(target)  # [input, target] -> disc output
@@ -85,8 +85,12 @@ def train_step(input_image, target, l2_weight, DISC_L2_OPT = False):
     discriminator_gradient = disc_tape.gradient(disc_loss, discriminator.trainable_variables)
 
     # apply gradient
-    generator_optimizer.apply_gradients(zip(generator_gradient, generator.trainable_variables))
+    if ((bi % 5) == 0):
+        generator_optimizer.apply_gradients(zip(generator_gradient, generator.trainable_variables))
+
+    # if ((bi % 5) == 0):
     discriminator_optimizer.apply_gradients(zip(discriminator_gradient, discriminator.trainable_variables))
+
     return gen_loss, disc_loss
 
 
@@ -103,7 +107,7 @@ def train(epochs, l2_weight, DISC_L2_OPT):
             # bi : index of sample
             # load_image_train : yields one H and Y...
             elapsed_time = datetime.datetime.now() - start_time
-            gen_loss, disc_loss = train_step(input_image, target, l2_weight, DISC_L2_OPT)
+            gen_loss, disc_loss = train_step(bi, input_image, target, l2_weight, DISC_L2_OPT)
 
             is_nan = (tf.math.is_nan(gen_loss)) or (tf.math.is_nan(disc_loss))
 
@@ -171,8 +175,8 @@ def train(epochs, l2_weight, DISC_L2_OPT):
     return nm, ep, is_nan
 
 ## Main Script Start...
-l2_weight_list = [0.001, 0.01, 0.1, 1, 10, 100]
-lr_gen_list = [1e-6, 1e-5, 1e-4, 1e-3, 1e-7]
+l2_weight_list = [0, 0.001, 0.01, 0.1, 1, 10, 100]
+lr_gen_list = [1e-3, 1e-4, 1e-5, 1e-6, 1e-7]
 beta1_list = [0.9]
 # l2_weight_list = [0.001]
 # lr_gen_list = [0.001]
@@ -213,10 +217,13 @@ for l2_weight in l2_weight_list:
                 discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-10)
 
             else:
-                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_abs_ang_210603.mat"               # optimizer
-                lr_dis = 2e-5
-                generator_optimizer = tf.compat.v1.train.AdamOptimizer(lr_gen, beta1 = beta1)
-                discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-9)
+                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_1bit_210603.mat"               # optimizer
+                lr_dis = 0.001
+                generator_optimizer = tf.keras.optimizers.Adam(lr_gen, beta_1 = beta1)
+                discriminator_optimizer = tf.keras.optimizers.RMSprop(lr_dis)
+
+                # generator_optimizer = tf.compat.v1.train.AdamOptimizer(lr_gen, beta1 = beta1)
+                # discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-9)
 
             # train
             nm, ep, is_nan = train(epochs=epochs, l2_weight =l2_weight, DISC_L2_OPT = DISC_L2_OPT)
