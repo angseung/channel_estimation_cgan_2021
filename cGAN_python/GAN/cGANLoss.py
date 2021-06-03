@@ -30,6 +30,7 @@ This allows the generated image to become structurally similar to the target ima
 The formula to calculate the total generator loss = gan_loss + LAMBDA * l2_loss, where LAMBDA = 100. 
 This value was decided by the authors of the paper.
 """
+cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)
 
 def discriminator_loss_custom(disc_real_output, disc_generated_output):
     """disc_real_output = [real_target]
@@ -69,21 +70,27 @@ def discriminator_loss(disc_real_output, disc_generated_output, l2_weight = 0.00
        disc_generated_output = [generated_target]
     """
     # log(DIS)
-    real_loss = tf.nn.sigmoid_cross_entropy_with_logits(
-        labels=tf.ones_like(disc_real_output), logits=disc_real_output)  # label=1
+    real_loss = cross_entropy(tf.ones_like(disc_real_output), disc_real_output)
+    generated_loss = cross_entropy(tf.zeros_like(disc_generated_output), disc_generated_output)
+    # total_loss = real_loss + generated_loss
+
+    # real_loss = tf.nn.sigmoid_cross_entropy_with_logits(
+    #     labels=tf.ones_like(disc_real_output), logits=disc_real_output)  # label=1
 
     # log(1-DIS(GEN))
-    generated_loss = tf.nn.sigmoid_cross_entropy_with_logits(
-        labels=tf.zeros_like(disc_generated_output), logits=disc_generated_output)  # label=0
+    # generated_loss = tf.nn.sigmoid_cross_entropy_with_logits(
+    #     labels=tf.zeros_like(disc_generated_output), logits=disc_generated_output)  # label=0
 
     # L2 loss
     l2_loss = tf.reduce_mean(tf.abs(disc_real_output - disc_generated_output))  # loss with target...
 
-    total_disc_loss = tf.reduce_mean(real_loss) \
-                      + tf.reduce_mean(generated_loss) \
-                      + (l2_weight * l2_loss * L2_OPT)
+    total_loss = real_loss + generated_loss + (L2_OPT * l2_weight * l2_loss)
 
-    return total_disc_loss
+    # total_disc_loss = tf.reduce_mean(real_loss) \
+    #                   + tf.reduce_mean(generated_loss) \
+    #                   + (l2_weight * l2_loss * L2_OPT)
+
+    return total_loss
 
 
 def generator_loss(disc_generated_output, gen_output, target, l2_weight = 100):
@@ -96,11 +103,13 @@ def generator_loss(disc_generated_output, gen_output, target, l2_weight = 100):
     # GAN loss
     # gen_loss = log(DIS(GEN))
     # total_loss = total_loss + l2_loss
-    gen_loss = tf.nn.sigmoid_cross_entropy_with_logits(
-        labels=tf.ones_like(disc_generated_output), logits=disc_generated_output)
+
+    # gen_loss = tf.nn.sigmoid_cross_entropy_with_logits(
+    #     labels=tf.ones_like(disc_generated_output), logits=disc_generated_output)
 
     # L2 loss
     l2_loss = tf.reduce_mean(tf.abs(target - gen_output))  # loss with target...
-    total_gen_loss = tf.reduce_mean(gen_loss) + l2_weight * l2_loss  ## Type : tf.tensor()
-    return total_gen_loss
+    # total_gen_loss = tf.reduce_mean(gen_loss) + l2_weight * l2_loss  ## Type : tf.tensor()
+
+    return cross_entropy(tf.ones_like(disc_generated_output), disc_generated_output) + l2_weight * l2_loss
 

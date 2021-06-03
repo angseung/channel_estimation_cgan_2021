@@ -4,7 +4,6 @@ import time
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
-import tensorflow_addons as tfa
 import matplotlib.pyplot as plt
 from GAN.cGANGenerator import Generator
 from GAN.cGANDiscriminator import Discriminator
@@ -231,7 +230,7 @@ for l2_weight in l2_weight_list:
                              rotation=90)  # verticalalignment (top, center, bottom)
 
             timestr = time.strftime("%Y%m%d_%H%M%S")
-            plt.text(0, 0, timestr)
+            # plt.text(0, 0, timestr)
 
             plt.xlabel('Epoch')
             plt.ylabel('NMSE (dB)')

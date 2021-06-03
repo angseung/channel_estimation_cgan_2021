@@ -3,6 +3,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import time
 import numpy as np
 import tensorflow as tf
+import tensorflow_addons as tfa
 from tensorflow.keras import layers
 import matplotlib.pyplot as plt
 import datetime
@@ -43,7 +44,8 @@ def make_generator_model():
                             input_shape=(num_tx, len_pilot * 4, 64),
                             kernel_initializer=initializer, use_bias=False))
     model.add(layers.LeakyReLU())
-    model.add((layers.BatchNormalization()))
+    # model.add((layers.BatchNormalization()))
+    model.add(tfa.layers.InstanceNormalization())
     if (PRINT_DEBUG_OPT):
         print(model.output_shape)
 
@@ -52,7 +54,8 @@ def make_generator_model():
                             input_shape=(num_tx / 2, len_pilot * 4 / 2, 64 * 2),
                             kernel_initializer=initializer, use_bias=False))
     model.add(layers.LeakyReLU())
-    model.add((layers.BatchNormalization()))
+    # model.add((layers.BatchNormalization()))
+    model.add(tfa.layers.InstanceNormalization())
     if (PRINT_DEBUG_OPT):
         print(model.output_shape)
 
@@ -61,7 +64,8 @@ def make_generator_model():
                             input_shape=(num_tx / 2, len_pilot * 4 / 2, 64 * 4),
                             kernel_initializer=initializer, use_bias=False))
     model.add(layers.LeakyReLU())
-    model.add((layers.BatchNormalization()))
+    # model.add((layers.BatchNormalization()))
+    model.add(tfa.layers.InstanceNormalization())
     if (PRINT_DEBUG_OPT):
         print(model.output_shape)
     # (8, 4, 512)
@@ -71,7 +75,8 @@ def make_generator_model():
                             input_shape=(num_tx / 8, len_pilot * 4 / 8, 64 * 8),
                             kernel_initializer=initializer, use_bias=False))
     model.add(layers.LeakyReLU())
-    model.add((layers.BatchNormalization()))
+    # model.add((layers.BatchNormalization()))
+    model.add(tfa.layers.InstanceNormalization())
     model.add(layers.Dropout(0.5))
     if (PRINT_DEBUG_OPT):
         print(model.output_shape)
@@ -82,7 +87,8 @@ def make_generator_model():
                             input_shape=(num_tx / 4, len_pilot * 4 / 4, 64 * 4),
                             kernel_initializer=initializer, use_bias=False))
     model.add(layers.LeakyReLU())
-    model.add((layers.BatchNormalization()))
+    # model.add((layers.BatchNormalization()))
+    model.add(tfa.layers.InstanceNormalization())
     model.add(layers.Dropout(0.5))
     if (PRINT_DEBUG_OPT):
         print(model.output_shape)
@@ -93,7 +99,8 @@ def make_generator_model():
                             input_shape=(num_tx / 2, len_pilot * 4 / 2, 64 * 2),
                             kernel_initializer=initializer, use_bias=False))
     model.add(layers.LeakyReLU())
-    model.add((layers.BatchNormalization()))
+    # model.add((layers.BatchNormalization()))
+    model.add(tfa.layers.InstanceNormalization())
     model.add(layers.Dropout(0.5))
     if (PRINT_DEBUG_OPT):
         print(model.output_shape)
@@ -104,7 +111,8 @@ def make_generator_model():
                             input_shape=(num_tx, len_pilot * 4, 64),
                             kernel_initializer=initializer, use_bias=False))
     model.add(layers.LeakyReLU())
-    model.add((layers.BatchNormalization()))
+    # model.add((layers.BatchNormalization()))
+    model.add(tfa.layers.InstanceNormalization())
     model.add(layers.Dropout(0.5))
     if (PRINT_DEBUG_OPT):
         print(model.output_shape)
@@ -137,7 +145,11 @@ def make_discriminator_model():
                             input_shape=(num_tx, num_user, 64),
                             kernel_initializer=initializer, use_bias=False))
     model.add(layers.LeakyReLU())
-    model.add(layers.BatchNormalization())
+    # model.add(layers.BatchNormalization())
+    model.add(tfa.layers.InstanceNormalization())
+    if (PRINT_DEBUG_OPT):
+        print(model.output_shape)
+
     model.add(layers.Dropout(0.5))
     if (PRINT_DEBUG_OPT):
         print(model.output_shape)
@@ -148,7 +160,8 @@ def make_discriminator_model():
                             input_shape=(num_tx / 2, num_user / 2, 64),
                             kernel_initializer=initializer, use_bias=False))
     model.add(layers.LeakyReLU())
-    model.add(layers.BatchNormalization())
+    # model.add(layers.BatchNormalization())
+    model.add(tfa.layers.InstanceNormalization())
     model.add(layers.Dropout(0.5))
     if (PRINT_DEBUG_OPT):
         print(model.output_shape)
@@ -159,7 +172,8 @@ def make_discriminator_model():
                             input_shape=(num_tx / 4, num_user / 4, 64),
                             kernel_initializer=initializer, use_bias=False))
     model.add(layers.LeakyReLU())
-    model.add(layers.BatchNormalization())
+    # model.add(layers.BatchNormalization())
+    model.add(tfa.layers.InstanceNormalization())
     model.add(layers.Dropout(0.5))
     if (PRINT_DEBUG_OPT):
         print(model.output_shape)
@@ -170,13 +184,15 @@ def make_discriminator_model():
                             input_shape=(num_tx / 8, num_user / 8, 64 * 2),
                             kernel_initializer=initializer, use_bias=False))
     model.add(layers.LeakyReLU())
-    model.add(layers.BatchNormalization())
+    # model.add(layers.BatchNormalization())
+    model.add(tfa.layers.InstanceNormalization())
     model.add(layers.Dropout(0.5))
     if (PRINT_DEBUG_OPT):
         print(model.output_shape)
 
     model.add(layers.Flatten())
     model.add(layers.Dense(1))
+    # model.add(layers.Softmax)
 
     return model
 
