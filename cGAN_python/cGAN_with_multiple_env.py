@@ -67,7 +67,7 @@ def train_step_custom(input_image, target, l2_weight):
 
 
 # @tf.function
-def train_step(input_image, target, l2_weight, DISC_L2_OPT = False):
+def train_step(bi, input_image, target, l2_weight, DISC_L2_OPT = False):
     with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
         gen_output = generator(input_image)  # input -> generated_target
         disc_real_output = discriminator(target)  # [input, target] -> disc output
@@ -87,7 +87,10 @@ def train_step(input_image, target, l2_weight, DISC_L2_OPT = False):
 
     # apply gradient
     generator_optimizer.apply_gradients(zip(generator_gradient, generator.trainable_variables))
-    discriminator_optimizer.apply_gradients(zip(discriminator_gradient, discriminator.trainable_variables))
+
+    if ((bi % 5) == 0):
+        discriminator_optimizer.apply_gradients(zip(discriminator_gradient, discriminator.trainable_variables))
+
     return gen_loss, disc_loss
 
 
@@ -104,7 +107,7 @@ def train(epochs, l2_weight, DISC_L2_OPT):
             # bi : index of sample
             # load_image_train : yields one H and Y...
             elapsed_time = datetime.datetime.now() - start_time
-            gen_loss, disc_loss = train_step(input_image, target, l2_weight, DISC_L2_OPT)
+            gen_loss, disc_loss = train_step(bi, input_image, target, l2_weight, DISC_L2_OPT)
 
             is_nan = (tf.math.is_nan(gen_loss)) or (tf.math.is_nan(disc_loss))
 
@@ -187,11 +190,11 @@ for l2_weight in l2_weight_list:
             BATCH_SIZE = 1
 
             # model
-            # generator = Generator()
-            # discriminator = Discriminator()
+            generator = Generator()
+            discriminator = Discriminator()
 
-            generator = make_generator_model()
-            discriminator = make_discriminator_model()
+            # generator = make_generator_model()
+            # discriminator = make_discriminator_model()
 
             # data path
             if (not DATASET_CUSTUM_OPT):
@@ -203,7 +206,7 @@ for l2_weight in l2_weight_list:
                 discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-10)
 
             else:
-                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_abs_ang_210602.mat"
+                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_210529.mat"
                 # optimizer
                 lr_dis = 2e-5
                 generator_optimizer = tf.compat.v1.train.AdamOptimizer(lr_gen, beta1 = beta1)

@@ -201,11 +201,11 @@ for l2_weight in l2_weight_list:
             BATCH_SIZE = 1
 
             # model
-            # generator = Generator()
-            # discriminator = Discriminator()
+            generator = Generator()
+            discriminator = Discriminator()
 
-            generator = make_generator_model()
-            discriminator = make_discriminator_model()
+            # generator = make_generator_model()
+            # discriminator = make_discriminator_model()
 
             # data path
             if (not DATASET_CUSTUM_OPT):
@@ -217,7 +217,7 @@ for l2_weight in l2_weight_list:
                 discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-10)
 
             else:
-                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_1bit_210603.mat"               # optimizer
+                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_abs_ang_210602.mat"               # optimizer
                 lr_dis = 0.001
                 generator_optimizer = tf.keras.optimizers.Adam(lr_gen, beta_1 = beta1)
                 discriminator_optimizer = tf.keras.optimizers.RMSprop(lr_dis)
