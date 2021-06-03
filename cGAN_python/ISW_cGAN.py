@@ -134,7 +134,8 @@ def train(epochs, l2_weight, DISC_L2_OPT):
         nmse_dB_temp = []
 
         for TESTBAT in range(test_batch_size):
-            prediction = generator(inpuim[TESTBAT])
+            new_input = inpuim[TESTBAT]
+            prediction = generator(new_input[np.newaxis, :])
 
             error_ = np.sum((realim[TESTBAT] - prediction) ** 2, axis=None)
             real_ = np.sum(realim[TESTBAT] ** 2, axis=None)
@@ -144,6 +145,8 @@ def train(epochs, l2_weight, DISC_L2_OPT):
 
         nmse_dB = sum(nmse_dB_temp) / test_batch_size
         nm.append(nmse_dB)
+
+        print(nm)
 
         # nm.append(np.log10(fuzz.nmse(np.squeeze(realim), np.squeeze(prediction))))
 
