@@ -197,9 +197,10 @@ def make_discriminator_model():
 
     return model
 
-a = np.zeros((num_tx, len_pilot, num_chan))
-m = make_generator_model()
-print("*****")
-m = make_discriminator_model()
-# print(m.output_shape)
+if (__name__ == "__main__"):
+    a = np.zeros((num_tx, len_pilot, num_chan))
+    m = make_generator_model()
+    print("*****")
+    m = make_discriminator_model()
+    # print(m.output_shape)
 

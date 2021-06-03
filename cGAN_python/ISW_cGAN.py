@@ -169,7 +169,7 @@ beta1_list = [0.9]
 
 # lr_gen_list = [0.0011];
 # beta1_list = [0.8]
-epochs = 20
+epochs = 10
 fig_num = 0
 nm_list = np.zeros((len(beta1_list) * len(beta1_list), epochs + 2))
 nm_val_list = []
