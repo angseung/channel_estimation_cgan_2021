@@ -4,24 +4,22 @@ clc, clear, close all;
 fft_len = 8;                % OFDM 부반송파의 수
 mod_type = 2;               % 변조 차수 ex) 1 - BPSK, 2 - QPSK, 4 - 16QAM, 6 - 64QAM, 8 - 256QAM
 rx_node = 1;                % 수신기의 수 (수신기의 안테나는 1개)
-tx_ant = 32;                % 기지국의 안테나 수
-rx_ant = 64;
+tx_ant = 64;                % 기지국의 안테나 수
+rx_ant =32;
 snr = 10;                   % 전송 채널 SNR 범위
 path = 3;
 scatter = 2;
 % iter = 300;               % 전송 반복 횟수
 pilot_len = 8;
-% num_datasets = 12000;
 num_datasets = 1548 + 664;
 % num_datasets = 100;
-% num_datasets = 5000
+% num_datasets = 5000;
 
 % 기본 파라미터 설정
 model = SCM();
 model.n_path = path;
 model.n_mray = scatter;
 model.fc = 2.5e9;
-model.los = 1;
 % model.fs = model.fc / 40;
 cp_len = fft_len / 4;
 % data_len = fft_len * mod_type;
@@ -47,7 +45,7 @@ t_H = zeros(path, N_rx * N_d, N_tx);
 % result_mimo = zeros(1, length(snr) );
 % result_cap = zeros(1, length(snr) );
 
-CH = zeros(num_datasets, N_rx, N_tx, 2);
+CH = zeros(num_datasets, N_rx, N_tx, path * 2);
 Y = zeros(num_datasets, N_rx, pilot_len, 2);
 
 %% Generating pilot 
@@ -81,10 +79,16 @@ for curr_dat = 1 : num_datasets
     assert(isempty(zero_test))
     
     %% Store current data to buffer
-    CH(curr_dat, :, :, 1) = real(H);
-    CH(curr_dat, :, :, 2) = imag(H);
-    Y(curr_dat, :, :, 1) = real(y);
-    Y(curr_dat, :, :, 2) = imag(y);
+    Y(curr_dat, :, :, 1) = abs(y);
+    Y(curr_dat, :, :, 2) = angle(y);
+    
+    p_cnt = 1;
+    
+    for j = 1 : 2 : path
+        CH(curr_dat, :, :, j) = abs(t_H(p_cnt, :, :));
+        CH(curr_dat, :, :, j + 1) = angle(t_H(p_cnt, :, :));
+        p_cnt = p_cnt + 1;
+    end
 
 end
 
@@ -99,12 +103,14 @@ numTrSamples = floor(trRatio * num_datasets);
 numValSamples = num_datasets - numTrSamples;
 
 input_da = Y_signed(1 : numTrSamples, :, :, :);
+% input_da = Y(1 : numTrSamples, :, :, :);
 output_da = CH(1 : numTrSamples, :, :, :);
 
 input_da_test = Y_signed(numTrSamples + 1 : end, : , : ,:);
+% input_da_test = Y(numTrSamples + 1 : end, : , : ,:);
 output_da_test = CH(numTrSamples + 1 : end, :, :, :);
 
 %% Save Generated Data to mat v7.3 hd5 file...
-formatSpec = "Gan_%d_dBOutdoorSCM_%dpath_%dscatter_los_210603.mat";
+formatSpec = "Gan_%d_dBOutdoorSCM_%dpath_%dscatter_abs_ang_chan_210603.mat";
 fname = sprintf(formatSpec, snr, path, scatter);
 save("Gan_Data\" + fname,'input_da','output_da','input_da_test','output_da_test','-v7.3')

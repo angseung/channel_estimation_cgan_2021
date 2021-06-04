@@ -88,8 +88,8 @@ def train_step(bi, input_image, target, l2_weight, DISC_L2_OPT = False):
     # apply gradient
     generator_optimizer.apply_gradients(zip(generator_gradient, generator.trainable_variables))
 
-    if ((bi % 5) == 0):
-        discriminator_optimizer.apply_gradients(zip(discriminator_gradient, discriminator.trainable_variables))
+    # if ((bi % 5) == 0):
+    discriminator_optimizer.apply_gradients(zip(discriminator_gradient, discriminator.trainable_variables))
 
     return gen_loss, disc_loss
 
@@ -173,7 +173,7 @@ beta1_list = [0.9]
 
 # lr_gen_list = [0.0011];
 # beta1_list = [0.8]
-epochs = 20
+epochs = 10
 fig_num = 0
 nm_list = np.zeros((len(beta1_list) * len(beta1_list), epochs + 2))
 nm_val_list = []
@@ -206,7 +206,7 @@ for l2_weight in l2_weight_list:
                 discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-10)
 
             else:
-                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_210603.mat"
+                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_los_210603.mat"
                 # optimizer
                 lr_dis = 2e-5
                 generator_optimizer = tf.compat.v1.train.AdamOptimizer(lr_gen, beta1 = beta1)
