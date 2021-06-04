@@ -4,22 +4,24 @@ clc, clear, close all;
 fft_len = 8;                % OFDM 부반송파의 수
 mod_type = 2;               % 변조 차수 ex) 1 - BPSK, 2 - QPSK, 4 - 16QAM, 6 - 64QAM, 8 - 256QAM
 rx_node = 1;                % 수신기의 수 (수신기의 안테나는 1개)
-tx_ant = 64;                % 기지국의 안테나 수
-rx_ant =32;
+tx_ant = 32;                % 기지국의 안테나 수
+rx_ant = 64;
 snr = 10;                   % 전송 채널 SNR 범위
 path = 3;
 scatter = 2;
 % iter = 300;               % 전송 반복 횟수
 pilot_len = 8;
+% num_datasets = 12000;
 num_datasets = 1548 + 664;
 % num_datasets = 100;
-% num_datasets = 5000;
+% num_datasets = 5000
 
 % 기본 파라미터 설정
 model = SCM();
 model.n_path = path;
 model.n_mray = scatter;
 model.fc = 2.5e9;
+model.los = 1;
 % model.fs = model.fc / 40;
 cp_len = fft_len / 4;
 % data_len = fft_len * mod_type;
@@ -74,7 +76,7 @@ for curr_dat = 1 : num_datasets
     y = H * pilot;
     [y, ~] = awgn_noise(y, snr);
     
-    % Debug ONLY...
+    %% Debug ONLY...
     zero_test = y(y == 0.0);
     assert(isempty(zero_test))
     
@@ -84,7 +86,7 @@ for curr_dat = 1 : num_datasets
     
     p_cnt = 1;
     
-    for j = 1 : 2 : path
+    for j = 1 : 2 : path * 2
         CH(curr_dat, :, :, j) = abs(t_H(p_cnt, :, :));
         CH(curr_dat, :, :, j + 1) = angle(t_H(p_cnt, :, :));
         p_cnt = p_cnt + 1;

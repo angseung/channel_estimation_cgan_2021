@@ -6,7 +6,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
 import tensorflow_addons as tfa
 import matplotlib.pyplot as plt
-from GAN.cGANGenerator import Generator
+from GAN.cGANGenerator import Generator, GeneratorRev
 from GAN.cGANDiscriminator import Discriminator
 from GAN.cGANLoss import generator_loss, generator_loss_custom, discriminator_loss_custom, discriminator_loss
 from GAN.data_preprocess import load_image_train, load_image_test, load_image_test_y
@@ -190,7 +190,7 @@ for l2_weight in l2_weight_list:
             BATCH_SIZE = 1
 
             # model
-            generator = Generator()
+            generator = GeneratorRev()
             discriminator = Discriminator()
 
             # generator = make_generator_model()
@@ -206,7 +206,7 @@ for l2_weight in l2_weight_list:
                 discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-10)
 
             else:
-                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_los_210603.mat"
+                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_abs_ang_chan_210603.mat"
                 # optimizer
                 lr_dis = 2e-5
                 generator_optimizer = tf.compat.v1.train.AdamOptimizer(lr_gen, beta1 = beta1)

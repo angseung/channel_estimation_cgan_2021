@@ -5,7 +5,7 @@ import time
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
 import matplotlib.pyplot as plt
-from GAN.cGANGenerator import Generator
+from GAN.cGANGenerator import Generator, GeneratorRev
 from GAN.cGANDiscriminator import Discriminator
 from GAN.data_preprocess import load_image_train, load_image_test, load_image_test_y
 from tempfile import TemporaryFile
