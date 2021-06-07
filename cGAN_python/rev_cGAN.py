@@ -143,13 +143,13 @@ def train(epochs, l2_weight, DISC_L2_OPT):
         nmse_dB = 10 * np.log10(error_ / real_)
         nm.append(nmse_dB)
 
-        (realim_t, inpuim_t) = load_image_train_batch(path)
-        prediction_t = generator(inpuim_t)
-
-        error_t = np.sum((realim_t - prediction_t) ** 2, axis=None)
-        real_t = np.sum(realim_t ** 2, axis=None)
-        nmse_dB_t = 10 * np.log10(error_t / real_t)
-        nm_t.append(nmse_dB_t)
+        # (realim_t, inpuim_t) = load_image_train_batch(path)
+        # prediction_t = generator(inpuim_t)
+        #
+        # error_t = np.sum((realim_t - prediction_t) ** 2, axis=None)
+        # real_t = np.sum(realim_t ** 2, axis=None)
+        # nmse_dB_t = 10 * np.log10(error_t / real_t)
+        # nm_t.append(nmse_dB_t)
 
         # nm.append(np.log10(fuzz.nmse(np.squeeze(realim), np.squeeze(prediction))))
 
@@ -174,15 +174,16 @@ def train(epochs, l2_weight, DISC_L2_OPT):
     return nm, nm_t, ep, is_nan
 
 ## Main Script Start...
-l2_weight_list = [0.0]
-lr_gen_list = [0.001]
-beta1_list = [0.9]
-# lr_gen_list = [1e-3, 1e-4, 5e-4, 1e-5, 5e-5, 1e-6]
-# beta1_list = [0.9, 0.8, 0.7, 0.6, 0.5]
+l2_weight_list = [0.001, 0.01]
+lr_gen_list = [1e-3, 1e-4, 5e-4, 1e-5, 5e-5, 1e-6]
+beta1_list = [0.9, 0.8, 0.7, 0.6, 0.5]
 # l2_weight_list = [0.001]
+# lr_gen_list = [0.001]
 # beta1_list = [0.9, 0.8, 0.7, 0.6, 0.5]
 
-epochs = 2
+# lr_gen_list = [0.0011];
+# beta1_list = [0.8]
+epochs = 10
 fig_num = 0
 nm_list = np.zeros((len(beta1_list) * len(beta1_list), epochs + 2))
 nm_val_list = []
@@ -215,7 +216,7 @@ for l2_weight in l2_weight_list:
                 discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-10)
 
             else:
-                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_abs_ang_chan_210603.mat"
+                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_re_im_chan_210603.mat"
                 # optimizer
                 lr_dis = 2e-5
                 generator_optimizer = tf.compat.v1.train.AdamOptimizer(lr_gen, beta1 = beta1)
@@ -231,8 +232,8 @@ for l2_weight in l2_weight_list:
             nm_val_list.append(nm)
 
             fig_nmse = plt.figure(fig_num)
-            plt.plot(ep, nm, '^-r', label="Test NMSE")
-            plt.plot(ep, nm_t, '^--g', label="Train NMSE")
+            plt.plot(ep, nm, '^-r')
+            # plt.plot(ep, nm_t, '^--g')
 
             for x, y in zip(ep, nm):
                 if (x > 9):
@@ -251,7 +252,6 @@ for l2_weight in l2_weight_list:
             plt.title("Epoch - NMSE Score, [lr : %.8f] [beta1 : %.3f], [l2_weight : %.8f]"
                       % (lr_gen, beta1, l2_weight))
             plt.grid(True)
-            plt.legend(loc='best')
             # plt.show()
             # fig_nmse.savefig("fig_temp/nmse_score_%05d_%s" % (fig_num, timestr))
             fig_nmse.savefig("fig_temp/nmse_score_%s_2epoch" % (timestr))

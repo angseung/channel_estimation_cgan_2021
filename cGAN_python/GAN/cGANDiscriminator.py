@@ -62,7 +62,8 @@ class DiscriminatorRev(tf.keras.Model):
         self.encoder_layer_1 = EncoderLayer(filters=64, kernel_size=4, apply_batchnorm=False)
         self.encoder_layer_2 = EncoderLayer(filters=128, kernel_size=4)
         self.encoder_layer_3 = EncoderLayer(filters=128, kernel_size=4)
-        # self.encoder_layer_4 = EncoderLayer(filters=128, kernel_size=4, strides_s=1)
+        self.encoder_layer_4 = EncoderLayer(filters=256, kernel_size=4, strides_s=1)
+        self.encoder_layer_5 = EncoderLayer(filters=256, kernel_size=4, strides_s=1)
 
         # conv block1
         self.zero_pad1 = layers.ZeroPadding2D()
@@ -82,7 +83,8 @@ class DiscriminatorRev(tf.keras.Model):
         x = self.encoder_layer_1(y)
         x = self.encoder_layer_2(x)
         x = self.encoder_layer_3(x)
-        # x = self.encoder_layer_4(x)
+        x = self.encoder_layer_4(x)
+        x = self.encoder_layer_5(x)
 
         x = self.zero_pad1(x)
         x = self.conv(x)
