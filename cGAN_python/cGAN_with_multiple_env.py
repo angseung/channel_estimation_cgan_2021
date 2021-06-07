@@ -153,7 +153,7 @@ def train(epochs, l2_weight, DISC_L2_OPT):
 
         # nm.append(np.log10(fuzz.nmse(np.squeeze(realim), np.squeeze(prediction))))
 
-        if epoch == epochs - 1:
+        if (epoch == epochs - 1):
             nmse_epoch = TemporaryFile()
             np.save(nmse_epoch, nm)
 

@@ -1,3 +1,4 @@
+import math
 import scipy
 import scipy.misc
 from glob import glob
@@ -81,7 +82,7 @@ def load_image_test_y(path):
 
 
 def load_image_train_batch(path):
-    """load, jitter, and normalize"""
+
     with h5py.File(path, 'r') as file:
         real_image = np.transpose(np.array(file['output_da']))
 

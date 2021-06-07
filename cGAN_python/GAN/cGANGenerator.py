@@ -30,8 +30,8 @@ class EncoderLayer(tf.keras.Model):
             self.encoder_layer = tf.keras.Sequential([conv])
 
         elif apply_batchnorm:
-            # bn = layers.BatchNormalization()
-            bn = tfa.layers.InstanceNormalization()
+            bn = layers.BatchNormalization()
+            # bn = tfa.layers.InstanceNormalization()
             self.encoder_layer = tf.keras.Sequential([conv, bn, ac])
 
         else:
@@ -50,8 +50,8 @@ class DecoderLayer(tf.keras.Model):
 
         dconv = layers.Conv2DTranspose(filters=filters, kernel_size=kernel_size, strides=strides_s,
                                        padding='same', kernel_initializer=initializer, use_bias=False)
-        # bn = layers.BatchNormalization()
-        bn = tfa.layers.InstanceNormalization()
+        bn = layers.BatchNormalization()
+        # bn = tfa.layers.InstanceNormalization()
         ac = layers.ReLU()
         self.decoder_layer = None
         
