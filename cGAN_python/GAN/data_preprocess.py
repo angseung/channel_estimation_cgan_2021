@@ -44,8 +44,6 @@ def load_image_train(path, batch_size = 1):
         yield imgs_A, imgs_B
         
 
-
-
 def load_image_test(path, batch_size = 1):
        
     with h5py.File(path, 'r') as file:
@@ -66,7 +64,8 @@ def load_image_test(path, batch_size = 1):
         
     
         yield imgs_A, imgs_B
-        
+
+
 def load_image_test_y(path):
        
     with h5py.File(path, 'r') as file:
@@ -79,3 +78,14 @@ def load_image_test_y(path):
         
     
     return real_image, input_image
+
+
+def load_image_train_batch(path):
+    """load, jitter, and normalize"""
+    with h5py.File(path, 'r') as file:
+        real_image = np.transpose(np.array(file['output_da']))
+
+    with h5py.File(path, 'r') as file:
+        input_image = np.transpose(np.array(file['input_da']))
+
+    return (real_image, input_image)

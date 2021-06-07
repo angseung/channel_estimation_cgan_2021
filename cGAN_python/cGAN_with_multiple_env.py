@@ -7,9 +7,9 @@ import tensorflow as tf
 import tensorflow_addons as tfa
 import matplotlib.pyplot as plt
 from GAN.cGANGenerator import Generator, GeneratorRev
-from GAN.cGANDiscriminator import Discriminator
+from GAN.cGANDiscriminator import Discriminator, DiscriminatorRev
 from GAN.cGANLoss import generator_loss, generator_loss_custom, discriminator_loss_custom, discriminator_loss
-from GAN.data_preprocess import load_image_train, load_image_test, load_image_test_y
+from GAN.data_preprocess import load_image_train, load_image_test, load_image_test_y, load_image_train_batch
 from GAN.cGANLayers import make_generator_model, make_discriminator_model
 from tempfile import TemporaryFile
 from scipy.io import loadmat, savemat
@@ -86,6 +86,7 @@ def train_step(bi, input_image, target, l2_weight, DISC_L2_OPT = False):
     discriminator_gradient = disc_tape.gradient(disc_loss, discriminator.trainable_variables)
 
     # apply gradient
+    # if ((bi % 2) == 0):
     generator_optimizer.apply_gradients(zip(generator_gradient, generator.trainable_variables))
 
     # if ((bi % 5) == 0):
@@ -96,6 +97,7 @@ def train_step(bi, input_image, target, l2_weight, DISC_L2_OPT = False):
 
 def train(epochs, l2_weight, DISC_L2_OPT):
     nm = []
+    nm_t = []
     ep = []
     start_time = datetime.datetime.now()
     print(os.getcwd())
@@ -133,13 +135,21 @@ def train(epochs, l2_weight, DISC_L2_OPT):
         # generator.save_weights(os.path.join(BASE_PATH, "weights/generator_"+str(epoch)+".h5"))
         # discriminator.save_weights(os.path.join(BASE_PATH, "weights/discriminator_"+str(epoch)+".h5"))
 
-        realim, inpuim = load_image_test_y(path)
+        (realim, inpuim) = load_image_test_y(path)
         prediction = generator(inpuim)
 
         error_ = np.sum((realim - prediction) ** 2, axis=None)
         real_ = np.sum(realim ** 2, axis=None)
         nmse_dB = 10 * np.log10(error_ / real_)
         nm.append(nmse_dB)
+
+        (realim_t, inpuim_t) = load_image_train_batch(path)
+        prediction_t = generator(inpuim_t)
+
+        error_t = np.sum((realim_t - prediction_t) ** 2, axis=None)
+        real_t = np.sum(realim_t ** 2, axis=None)
+        nmse_dB_t = 10 * np.log10(error_t / real_t)
+        nm_t.append(nmse_dB_t)
 
         # nm.append(np.log10(fuzz.nmse(np.squeeze(realim), np.squeeze(prediction))))
 
@@ -161,12 +171,12 @@ def train(epochs, l2_weight, DISC_L2_OPT):
         # plt.ylabel('NMSE')
         # plt.show();
 
-    return nm, ep, is_nan
+    return nm, nm_t, ep, is_nan
 
 ## Main Script Start...
-l2_weight_list = [0.001, 0.01, 0.1, 1, 10, 100]
-lr_gen_list = [1e-6, 1e-5, 1e-4, 1e-3, 1e-7]
-beta1_list = [0.9]
+l2_weight_list = [0.001, 0.01]
+lr_gen_list = [1e-3, 1e-4, 5e-4, 1e-5, 5e-5, 1e-6]
+beta1_list = [0.9, 0.8, 0.7, 0.6, 0.5]
 # l2_weight_list = [0.001]
 # lr_gen_list = [0.001]
 # beta1_list = [0.9, 0.8, 0.7, 0.6, 0.5]
@@ -191,7 +201,7 @@ for l2_weight in l2_weight_list:
 
             # model
             generator = GeneratorRev()
-            discriminator = Discriminator()
+            discriminator = DiscriminatorRev()
 
             # generator = make_generator_model()
             # discriminator = make_discriminator_model()
@@ -213,7 +223,7 @@ for l2_weight in l2_weight_list:
                 discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-9)
 
             # train
-            nm, ep, is_nan = train(epochs=epochs, l2_weight =l2_weight, DISC_L2_OPT = DISC_L2_OPT)
+            (nm, nm_t, ep, is_nan) = train(epochs=epochs, l2_weight =l2_weight, DISC_L2_OPT = DISC_L2_OPT)
 
             if (is_nan):
                 print("nan detected... skip for this params...")
@@ -223,6 +233,7 @@ for l2_weight in l2_weight_list:
 
             fig_nmse = plt.figure(fig_num)
             plt.plot(ep, nm, '^-r')
+            plt.plot(ep, nm_t, '^--g')
 
             for x, y in zip(ep, nm):
                 if (x > 9):
@@ -243,6 +254,6 @@ for l2_weight in l2_weight_list:
             plt.grid(True)
             # plt.show()
             # fig_nmse.savefig("fig_temp/nmse_score_%05d_%s" % (fig_num, timestr))
-            fig_nmse.savefig("fig_temp/nmse_score_%s" % (timestr))
+            fig_nmse.savefig("fig_temp/nmse_score_%s_2epoch" % (timestr))
 
             fig_num = fig_num + 1
