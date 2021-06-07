@@ -111,5 +111,6 @@ def generator_loss(disc_generated_output, gen_output, target, l2_weight = 100):
     l2_loss = tf.reduce_mean(tf.abs(target - gen_output))  # loss with target...
     # total_gen_loss = tf.reduce_mean(gen_loss) + l2_weight * l2_loss  ## Type : tf.tensor()
 
-    return cross_entropy(tf.ones_like(disc_generated_output), disc_generated_output) + l2_weight * l2_loss
+    return cross_entropy(tf.ones_like(disc_generated_output),
+                         disc_generated_output) + l2_weight * l2_loss
 

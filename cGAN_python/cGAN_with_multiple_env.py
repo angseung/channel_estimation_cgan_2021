@@ -182,7 +182,7 @@ beta1_list = [0.9]
 # l2_weight_list = [0.001]
 # beta1_list = [0.9, 0.8, 0.7, 0.6, 0.5]
 
-epochs = 2
+epochs = 10
 fig_num = 0
 nm_list = np.zeros((len(beta1_list) * len(beta1_list), epochs + 2))
 nm_val_list = []
@@ -226,7 +226,7 @@ for l2_weight in l2_weight_list:
 
             if (is_nan):
                 print("nan detected... skip for this params...")
-                continue
+                break
 
             nm_val_list.append(nm)
 

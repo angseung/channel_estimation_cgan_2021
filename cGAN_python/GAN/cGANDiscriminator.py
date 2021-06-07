@@ -28,8 +28,8 @@ class Discriminator(tf.keras.Model):
         # conv block1
         self.zero_pad1 = layers.ZeroPadding2D()                                
         self.conv = tf.keras.layers.Conv2D(512, 4, strides=1, kernel_initializer=initializer, use_bias=False)
-        self.bn1 = layers.BatchNormalization()
-        # self.bn1 = tfa.layers.InstanceNormalization()
+        # self.bn1 = layers.BatchNormalization()
+        self.bn1 = tfa.layers.InstanceNormalization()
         self.ac = layers.LeakyReLU()
 
         # block2
@@ -68,8 +68,8 @@ class DiscriminatorRev(tf.keras.Model):
         # conv block1
         self.zero_pad1 = layers.ZeroPadding2D()
         self.conv = tf.keras.layers.Conv2D(512, 4, strides=1, kernel_initializer=initializer, use_bias=False)
-        self.bn1 = layers.BatchNormalization()
-        # self.bn1 = tfa.layers.InstanceNormalization()
+        # self.bn1 = layers.BatchNormalization()
+        self.bn1 = tfa.layers.InstanceNormalization()
         self.ac = layers.LeakyReLU()
 
         # block2
