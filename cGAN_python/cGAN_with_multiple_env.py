@@ -187,6 +187,7 @@ fig_num = 0
 nm_list = np.zeros((len(beta1_list) * len(beta1_list), epochs + 2))
 nm_val_list = []
 DISC_L2_OPT = False
+dropout_prob = 0.5
 
 ## DATASET Option
 DATASET_CUSTUM_OPT = True
@@ -200,7 +201,7 @@ for l2_weight in l2_weight_list:
 
             # model
             generator = GeneratorRev()
-            discriminator = DiscriminatorRev()
+            discriminator = DiscriminatorRev(dropout_prob=dropout_prob)
 
             # generator = make_generator_model()
             # discriminator = make_discriminator_model()

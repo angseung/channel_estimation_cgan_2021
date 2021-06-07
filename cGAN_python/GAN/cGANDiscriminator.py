@@ -55,7 +55,7 @@ class Discriminator(tf.keras.Model):
 
 
 class DiscriminatorRev(tf.keras.Model):
-    def __init__(self):
+    def __init__(self, dropout_prob = 0.3):
         super(DiscriminatorRev, self).__init__()
         initializer = tf.random_normal_initializer(0., 0.02)
         # downsample
@@ -74,7 +74,12 @@ class DiscriminatorRev(tf.keras.Model):
 
         # block2
         self.zero_pad2 = tf.keras.layers.ZeroPadding2D()
-        self.last = tf.keras.layers.Conv2D(1, 4, strides=1, kernel_initializer=initializer)
+        self.cv2 = tf.keras.layers.Conv2D(1, 4, strides=1, kernel_initializer=initializer)
+
+        ## output
+        self.relu = layers.LeakyReLU()
+        self.DL = layers.Dropout(dropout_prob)
+        self.DS = layers.Dense(1)
 
     def call(self, y):
         """inputs can be generated image. """
@@ -92,7 +97,12 @@ class DiscriminatorRev(tf.keras.Model):
         x = self.ac(x)
 
         x = self.zero_pad2(x)
-        x = self.last(x)
+        x = self.cv2(x)
+
+        x = self.relu(x)
+        x = self.DL(x)
+        x = self.DS(x)
+
         return x
 
 
