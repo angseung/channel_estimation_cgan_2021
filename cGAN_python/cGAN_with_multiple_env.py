@@ -86,8 +86,8 @@ def train_step(bi, input_image, target, l2_weight, DISC_L2_OPT = False):
     discriminator_gradient = disc_tape.gradient(disc_loss, discriminator.trainable_variables)
 
     # apply gradient
-    # if ((bi % 2) == 0):
-    generator_optimizer.apply_gradients(zip(generator_gradient, generator.trainable_variables))
+    if ((bi % 2) == 0):
+        generator_optimizer.apply_gradients(zip(generator_gradient, generator.trainable_variables))
 
     # if ((bi % 5) == 0):
     discriminator_optimizer.apply_gradients(zip(discriminator_gradient, discriminator.trainable_variables))
@@ -95,7 +95,7 @@ def train_step(bi, input_image, target, l2_weight, DISC_L2_OPT = False):
     return gen_loss, disc_loss
 
 
-def train(epochs, l2_weight, DISC_L2_OPT):
+def train(epochs, l2_weight, DISC_L2_OPT, TRAIN_SHOW_OPE = False):
     nm = []
     nm_t = []
     ep = []
@@ -109,7 +109,11 @@ def train(epochs, l2_weight, DISC_L2_OPT):
             # bi : index of sample
             # load_image_train : yields one H and Y...
             elapsed_time = datetime.datetime.now() - start_time
-            gen_loss, disc_loss = train_step(bi, input_image, target, l2_weight, DISC_L2_OPT)
+            gen_loss, disc_loss = train_step(bi,
+                                             input_image,
+                                             target,
+                                             l2_weight,
+                                             DISC_L2_OPT)
 
             is_nan = (tf.math.is_nan(gen_loss)) or (tf.math.is_nan(disc_loss))
 
@@ -153,9 +157,14 @@ def train(epochs, l2_weight, DISC_L2_OPT):
 
         # nm.append(np.log10(fuzz.nmse(np.squeeze(realim), np.squeeze(prediction))))
 
-        if (epoch == epochs - 1):
-            nmse_epoch = TemporaryFile()
-            np.save(nmse_epoch, nm)
+        if (TRAIN_SHOW_OPE):
+            fig_temp = plt.figure(epoch + 10e3)
+            plt.plot(range(1, epoch + 2), nm, label="Test")
+            plt.plot(range(1, epoch + 2), nm_t, label="Train")
+            plt.grid(True)
+            plt.legend(loc = 'best')
+            plt.show()
+
 
         # Save the predicted Channel
         matfiledata = {}  # make a dictionary to store the MAT data in
@@ -171,7 +180,7 @@ def train(epochs, l2_weight, DISC_L2_OPT):
         # plt.ylabel('NMSE')
         # plt.show();
 
-    return nm, nm_t, ep, is_nan
+    return (nm, nm_t, ep, is_nan)
 
 ## Main Script Start...
 l2_weight_list = [0.0]
@@ -187,7 +196,7 @@ fig_num = 0
 nm_list = np.zeros((len(beta1_list) * len(beta1_list), epochs + 2))
 nm_val_list = []
 DISC_L2_OPT = False
-dropout_prob = 0.5
+dropout_rate = 0.3
 
 ## DATASET Option
 DATASET_CUSTUM_OPT = True
@@ -201,7 +210,7 @@ for l2_weight in l2_weight_list:
 
             # model
             generator = GeneratorRev()
-            discriminator = DiscriminatorRev(dropout_prob=dropout_prob)
+            discriminator = DiscriminatorRev(dropout_rate=dropout_rate)
 
             # generator = make_generator_model()
             # discriminator = make_discriminator_model()
@@ -216,14 +225,17 @@ for l2_weight in l2_weight_list:
                 discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-10)
 
             else:
-                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_abs_ang_chan_210603.mat"
+                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_re_im_chan_210607.mat"
                 # optimizer
                 lr_dis = 2e-5
                 generator_optimizer = tf.compat.v1.train.AdamOptimizer(lr_gen, beta1 = beta1)
                 discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-9)
 
             # train
-            (nm, nm_t, ep, is_nan) = train(epochs=epochs, l2_weight =l2_weight, DISC_L2_OPT = DISC_L2_OPT)
+            (nm, nm_t, ep, is_nan) = train(epochs = epochs,
+                                           l2_weight = l2_weight,
+                                           DISC_L2_OPT = DISC_L2_OPT,
+                                           TRAIN_SHOW_OPE = True)
 
             if (is_nan):
                 print("nan detected... skip for this params...")
@@ -231,7 +243,7 @@ for l2_weight in l2_weight_list:
 
             nm_val_list.append(nm)
 
-            fig_nmse = plt.figure(fig_num)
+            fig_nmse = plt.figure(fig_num, figsize=(10, 10))
             plt.plot(ep, nm, '^-r', label="Test NMSE")
             plt.plot(ep, nm_t, '^--g', label="Train NMSE")
 
@@ -245,7 +257,7 @@ for l2_weight in l2_weight_list:
                              rotation=90)  # verticalalignment (top, center, bottom)
 
             timestr = time.strftime("%Y%m%d_%H%M%S")
-            plt.text(0, 0, timestr)
+            # plt.text(0, 0, timestr)
 
             plt.xlabel('Epoch')
             plt.ylabel('NMSE (dB)')

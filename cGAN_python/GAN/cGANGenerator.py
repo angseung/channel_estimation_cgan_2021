@@ -15,7 +15,15 @@ There are skip connections between the encoder and decoder (as in U-Net).
 """
 
 class EncoderLayer(tf.keras.Model):
-    def __init__(self, filters, kernel_size, strides_s = 2, apply_batchnorm=True, add = False, padding_s = 'same'):
+    def __init__(self,
+                 filters,
+                 kernel_size,
+                 strides_s = 2,
+                 apply_batchnorm = True,
+                 apply_dropout = False,
+                 add = False,
+                 padding_s = 'same'):
+
         super(EncoderLayer, self).__init__()
 
         # initializer = tf.keras.initializers.Orthogonal(gain = 1.0, seed = None)
@@ -34,6 +42,12 @@ class EncoderLayer(tf.keras.Model):
             bn = tfa.layers.InstanceNormalization()
             self.encoder_layer = tf.keras.Sequential([conv, bn, ac])
 
+        elif apply_dropout:
+            # bn = layers.BatchNormalization()
+            bn = tfa.layers.InstanceNormalization()
+            drop = layers.Dropout(rate=0.5)
+            self.encoder_layer = tf.keras.Sequential([conv, bn, drop, ac])
+
         else:
             self.encoder_layer = tf.keras.Sequential([conv, ac])
 
@@ -42,7 +56,13 @@ class EncoderLayer(tf.keras.Model):
 
 
 class DecoderLayer(tf.keras.Model):
-    def __init__(self, filters, kernel_size, strides_s = 2, apply_dropout=False, add = False):
+    def __init__(self,
+                 filters,
+                 kernel_size,
+                 strides_s = 2,
+                 apply_dropout = False,
+                 add = False):
+
         super(DecoderLayer, self).__init__()
 
         # initializer = tf.keras.initializers.Orthogonal(gain = 1.0, seed = None)
@@ -121,7 +141,9 @@ class Generator(tf.keras.Model):
 
 
 class GeneratorRev(tf.keras.Model):
-    def __init__(self, n_path = 3):
+    def __init__(self,
+                 n_path = 3):
+
         super(GeneratorRev, self).__init__()
         self.n_path = n_path * 2
 
