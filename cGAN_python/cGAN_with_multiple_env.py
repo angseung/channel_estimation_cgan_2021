@@ -86,8 +86,8 @@ def train_step(bi, input_image, target, l2_weight, DISC_L2_OPT = False):
     discriminator_gradient = disc_tape.gradient(disc_loss, discriminator.trainable_variables)
 
     # apply gradient
-    if ((bi % 2) == 0):
-        generator_optimizer.apply_gradients(zip(generator_gradient, generator.trainable_variables))
+    # if ((bi % 3) == 0):
+    generator_optimizer.apply_gradients(zip(generator_gradient, generator.trainable_variables))
 
     # if ((bi % 5) == 0):
     discriminator_optimizer.apply_gradients(zip(discriminator_gradient, discriminator.trainable_variables))
@@ -183,7 +183,7 @@ def train(epochs, l2_weight, DISC_L2_OPT, TRAIN_SHOW_OPE = False):
     return (nm, nm_t, ep, is_nan)
 
 ## Main Script Start...
-l2_weight_list = [0.0]
+l2_weight_list = [10.0]
 lr_gen_list = [0.001]
 beta1_list = [0.9]
 # lr_gen_list = [1e-3, 1e-4, 5e-4, 1e-5, 5e-5, 1e-6]
