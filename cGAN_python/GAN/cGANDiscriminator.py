@@ -19,9 +19,9 @@ class Discriminator(tf.keras.Model):
         super(Discriminator, self).__init__()
         initializer = tf.random_normal_initializer(0., 0.02)
         # downsample
-        self.encoder_layer_1 = EncoderLayer(filters=64, kernel_size=4, apply_batchnorm=False) 
-        self.encoder_layer_2 = EncoderLayer(filters=128, kernel_size=4)        
-        self.encoder_layer_3 = EncoderLayer(filters=128, kernel_size=4)        
+        self.encoder_layer_1 = EncoderLayer(filters=64, kernel_size=4, apply_batchnorm=False)
+        self.encoder_layer_2 = EncoderLayer(filters=128, kernel_size=4)
+        self.encoder_layer_3 = EncoderLayer(filters=128, kernel_size=4)
 
         # conv block1
         self.zero_pad1 = layers.ZeroPadding2D()                                
@@ -122,7 +122,7 @@ class DiscriminatorRev(tf.keras.Model):
         x = self.relu(x)
         x = self.DL(x)
         x = self.FL(x)
-        x = self.DS(x)
+        # x = self.DS(x)
 
         return x
 

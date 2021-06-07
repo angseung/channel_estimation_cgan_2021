@@ -159,8 +159,8 @@ def train(epochs, l2_weight, DISC_L2_OPT, TRAIN_SHOW_OPE = False):
 
         if (TRAIN_SHOW_OPE):
             fig_temp = plt.figure(epoch + 10e3)
-            plt.plot(range(1, epoch + 2), nm, label="Test")
-            plt.plot(range(1, epoch + 2), nm_t, label="Train")
+            plt.plot(range(1, epoch + 2), nm, 'bx-', label="Test")
+            plt.plot(range(1, epoch + 2), nm_t, 'go--', label="Train")
             plt.grid(True)
             plt.legend(loc = 'best')
             plt.show()
@@ -196,7 +196,7 @@ fig_num = 0
 nm_list = np.zeros((len(beta1_list) * len(beta1_list), epochs + 2))
 nm_val_list = []
 DISC_L2_OPT = False
-dropout_rate = 0.3
+dropout_rate = 0.0
 
 ## DATASET Option
 DATASET_CUSTUM_OPT = True
@@ -225,7 +225,7 @@ for l2_weight in l2_weight_list:
                 discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-10)
 
             else:
-                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_re_im_chan_210607.mat"
+                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_re_im_chan_210607_v2.mat"
                 # optimizer
                 lr_dis = 2e-5
                 generator_optimizer = tf.compat.v1.train.AdamOptimizer(lr_gen, beta1 = beta1)

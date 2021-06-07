@@ -12,9 +12,9 @@ scatter = 2;
 % iter = 300;               % 전송 반복 횟수
 pilot_len = 8;
 % num_datasets = 12000;
-num_datasets = 1548 + 664;
+% num_datasets = 1548 + 664;
 % num_datasets = 100;
-% num_datasets = 5000
+num_datasets = 5000;
 
 % 기본 파라미터 설정
 model = SCM();
@@ -51,9 +51,9 @@ CH = zeros(num_datasets, N_rx, N_tx, path * 2);
 Y = zeros(num_datasets, N_rx, pilot_len, 2);
 
 %% Generating pilot 
-pilot_t = uniformPilotsGen(pilot_len);
-pilot_t = pilot_t{1,1};
-pilot = repmat(pilot_t, [1 tx_ant])';
+% pilot_t = uniformPilotsGen(pilot_len);
+% pilot_t = pilot_t{1,1};
+% pilot = repmat(pilot_t, [1 tx_ant])';
 
 %% 반복 시작
 for curr_dat = 1 : num_datasets
@@ -69,8 +69,8 @@ for curr_dat = 1 : num_datasets
     H = squeeze(sum(t_H, 1));
 
     % 데이터 생성
-%     pilot = cdm_gen_freq(pilot_len + 1, rx_node);
-%     pilot = pilot(:, 1 : pilot_len);
+    pilot = cdm_gen_freq(pilot_len + 1, tx_ant);
+    pilot = pilot(:, 1 : pilot_len);
 
     % Received signal at RX
     y = H * pilot;
@@ -95,24 +95,24 @@ for curr_dat = 1 : num_datasets
 end
 
 %% Quantization Received Y
-% Y_signed = zeros(size(Y));
-% Y_signed(:, :, :, 1) = sign(Y(:, :, :, 1));
-% Y_signed(:, :, :, 2) = sign(Y(:, :, :, 2));
+Y_signed = zeros(size(Y));
+Y_signed(:, :, :, 1) = sign(Y(:, :, :, 1));
+Y_signed(:, :, :, 2) = sign(Y(:, :, :, 2));
 
 %% Split data for training
 trRatio = 0.7;
 numTrSamples = floor(trRatio * num_datasets);
 numValSamples = num_datasets - numTrSamples;
 
-% input_da = Y_signed(1 : numTrSamples, :, :, :);
-input_da = Y(1 : numTrSamples, :, :, :);
+input_da = Y_signed(1 : numTrSamples, :, :, :);
+% input_da = Y(1 : numTrSamples, :, :, :);
 output_da = CH(1 : numTrSamples, :, :, :);
 
-% input_da_test = Y_signed(numTrSamples + 1 : end, : , : ,:);
-input_da_test = Y(numTrSamples + 1 : end, : , : ,:);
+input_da_test = Y_signed(numTrSamples + 1 : end, : , : ,:);
+% input_da_test = Y(numTrSamples + 1 : end, : , : ,:);
 output_da_test = CH(numTrSamples + 1 : end, :, :, :);
 
 %% Save Generated Data to mat v7.3 hd5 file...
-formatSpec = "Gan_%d_dBOutdoorSCM_%dpath_%dscatter_re_im_chan_210607.mat";
+formatSpec = "Gan_%d_dBOutdoorSCM_%dpath_%dscatter_re_im_chan_210607_v2.mat";
 fname = sprintf(formatSpec, snr, path, scatter);
 save("Gan_Data\" + fname,'input_da','output_da','input_da_test','output_da_test','-v7.3')
