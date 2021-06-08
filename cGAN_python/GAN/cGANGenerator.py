@@ -150,21 +150,20 @@ class GeneratorRev(tf.keras.Model):
         # Resize Input
         p_layer_1 = DecoderLayer(filters=2, kernel_size=4, strides_s=2, apply_dropout=False, add=True)
         p_layer_2 = DecoderLayer(filters=2, kernel_size=4, strides_s=2, apply_dropout=False, add=True)
-        p_layer_3 = EncoderLayer(filters=2, kernel_size=(6, 1), strides_s=(4, 1),
-                                 apply_batchnorm=False, add=True)
+        p_layer_3 = EncoderLayer(filters=2, kernel_size=(6, 1), strides_s=(4, 1), apply_dropout=True, add=True)
 
         self.p_layers = [p_layer_1, p_layer_2, p_layer_3]
 
         # encoder
-        encoder_layer_1  = EncoderLayer(filters=64 * 1, kernel_size=4, apply_batchnorm=False)
+        encoder_layer_1  = EncoderLayer(filters=64 * 1, kernel_size=4, apply_dropout=True)
         encoder_layer_1n = EncoderLayer(filters=64 * 2, kernel_size=4, strides_s=1)
-        encoder_layer_2  = EncoderLayer(filters=64 * 2, kernel_size=4)
+        encoder_layer_2  = EncoderLayer(filters=64 * 2, kernel_size=4, apply_dropout=True)
         encoder_layer_2n = EncoderLayer(filters=64 * 2, kernel_size=4, strides_s=1)
-        encoder_layer_3  = EncoderLayer(filters=64 * 4, kernel_size=4)
+        encoder_layer_3  = EncoderLayer(filters=64 * 4, kernel_size=4, apply_dropout=True)
         encoder_layer_3n = EncoderLayer(filters=64 * 4, kernel_size=4, strides_s=1)
-        encoder_layer_4  = EncoderLayer(filters=64 * 8, kernel_size=4)
+        encoder_layer_4  = EncoderLayer(filters=64 * 8, kernel_size=4, apply_dropout=True)
         encoder_layer_4n = EncoderLayer(filters=64 * 8, kernel_size=4, strides_s=1)
-        encoder_layer_5  = EncoderLayer(filters=64 * 8, kernel_size=4)
+        encoder_layer_5  = EncoderLayer(filters=64 * 8, kernel_size=4, apply_dropout=True)
         self.encoder_layers = [encoder_layer_1,
                                encoder_layer_1n,
                                encoder_layer_2,

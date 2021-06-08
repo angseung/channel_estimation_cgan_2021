@@ -189,8 +189,8 @@ def train(epochs, l2_weight, DISC_L2_OPT, TRAIN_SHOW_OPE = False):
     return (nm, nm_t, ep, is_nan)
 
 ## Main Script Start...
-l2_weight_list = [0.0]
-lr_gen_list = [0.001]
+l2_weight_list = [0.0, 1.0, 5.0, 10.0, 100.0]
+lr_gen_list = [1e-3, 5e-4, 1e-4, 1e-5]
 lr_dis_list = [1e-3, 5e-4, 1e-4, 1e-5]
 beta1_list = [0.9]
 # lr_gen_list = [1e-3, 1e-4, 5e-4, 1e-5, 5e-5, 1e-6]
