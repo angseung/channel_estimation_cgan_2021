@@ -69,17 +69,23 @@ def train_step_custom(input_image, target, l2_weight):
 # @tf.function
 def train_step(bi, input_image, target, l2_weight, DISC_L2_OPT = False):
     with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
-        gen_output = generator(input_image)  # input -> generated_target
-        disc_real_output = discriminator(target)  # [input, target] -> disc output
-        disc_generated_output = discriminator(gen_output)  # [input, generated_target] -> disc output
+        gen_output = generator(input_image, training=True)  # input -> generated_target
+        disc_real_output = discriminator(target, training=True)  # [input, target] -> disc output
+        disc_generated_output = discriminator(gen_output, training=True)  # [input, generated_target] -> disc output
         # print("******** [DIC-REAL : %.8f], [DIC-GEN : %.8f]]**********"
         #       %(disc_real_output, disc_generated_output))
         # print("*", gen_output.shape, disc_real_output.shape, disc_generated_output.shape)
 
         # calculate loss
-        gen_loss = generator_loss(disc_generated_output, gen_output, target, l2_weight)  # gen loss
-        disc_loss = discriminator_loss(disc_real_output, disc_generated_output,
-                                       l2_weight = 1.0,  L2_OPT = DISC_L2_OPT)  # disc loss
+        gen_loss = generator_loss(disc_generated_output,
+                                  gen_output,
+                                  target,
+                                  l2_weight)  # gen loss
+
+        disc_loss = discriminator_loss(disc_real_output,
+                                       disc_generated_output,
+                                       l2_weight = 1.0,
+                                       L2_OPT = DISC_L2_OPT)  # disc loss
 
     # gradient
     generator_gradient = gen_tape.gradient(gen_loss, generator.trainable_variables)
@@ -89,10 +95,10 @@ def train_step(bi, input_image, target, l2_weight, DISC_L2_OPT = False):
     # if ((bi % 3) == 0):
     generator_optimizer.apply_gradients(zip(generator_gradient, generator.trainable_variables))
 
-    # if ((bi % 5) == 0):
+    # if ((bi % 2) == 0):
     discriminator_optimizer.apply_gradients(zip(discriminator_gradient, discriminator.trainable_variables))
 
-    return gen_loss, disc_loss
+    return (gen_loss, disc_loss)
 
 
 def train(epochs, l2_weight, DISC_L2_OPT, TRAIN_SHOW_OPE = False):
@@ -109,7 +115,7 @@ def train(epochs, l2_weight, DISC_L2_OPT, TRAIN_SHOW_OPE = False):
             # bi : index of sample
             # load_image_train : yields one H and Y...
             elapsed_time = datetime.datetime.now() - start_time
-            gen_loss, disc_loss = train_step(bi,
+            (gen_loss, disc_loss) = train_step(bi,
                                              input_image,
                                              target,
                                              l2_weight,
@@ -140,7 +146,7 @@ def train(epochs, l2_weight, DISC_L2_OPT, TRAIN_SHOW_OPE = False):
         # discriminator.save_weights(os.path.join(BASE_PATH, "weights/discriminator_"+str(epoch)+".h5"))
 
         (realim, inpuim) = load_image_test_y(path)
-        prediction = generator(inpuim)
+        prediction = generator(inpuim, training=False)
 
         error_ = np.sum((realim - prediction) ** 2, axis=None)
         real_ = np.sum(realim ** 2, axis=None)
@@ -148,7 +154,7 @@ def train(epochs, l2_weight, DISC_L2_OPT, TRAIN_SHOW_OPE = False):
         nm.append(nmse_dB)
 
         (realim_t, inpuim_t) = load_image_train_batch(path)
-        prediction_t = generator(inpuim_t)
+        prediction_t = generator(inpuim_t, training=False)
 
         error_t = np.sum((realim_t - prediction_t) ** 2, axis=None)
         real_t = np.sum(realim_t ** 2, axis=None)
@@ -197,7 +203,7 @@ fig_num = 0
 nm_list = np.zeros((len(beta1_list) * len(beta1_list), epochs + 2))
 nm_val_list = []
 DISC_L2_OPT = False
-dropout_rate = 0.0
+path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_re_im_chan_210608_v5.mat"
 
 ## DATASET Option
 DATASET_CUSTUM_OPT = True
@@ -208,10 +214,11 @@ for l2_weight in l2_weight_list:
         for lr_gen in lr_gen_list:
             for lr_dis in lr_dis_list:
 
+                dropout_rate = 0.5
                 BATCH_SIZE = 1
 
                 # model
-                generator = GeneratorRev2()
+                generator = GeneratorRev()
                 discriminator = DiscriminatorRev(dropout_rate=dropout_rate)
 
                 # generator = make_generator_model()
@@ -227,11 +234,14 @@ for l2_weight in l2_weight_list:
                     discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-10)
 
                 else:
-                    path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_re_im_chan_210608_v4.mat"
                     # optimizer
                     # lr_dis = 1e-3
-                    generator_optimizer = tf.compat.v1.train.AdamOptimizer(lr_gen, beta1 = beta1)
-                    discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-9)
+                    # generator_optimizer = tf.compat.v1.train.AdamOptimizer(lr_gen, beta1 = beta1)
+                    # discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-9)
+                    generator_optimizer = tf.keras.optimizers.Adam(learning_rate=lr_gen,
+                                                                           beta_1 = beta1)
+                    discriminator_optimizer = tf.keras.optimizers.RMSprop(learning_rate=lr_dis,
+                                                                          epsilon=1e-9)
 
                 # train
                 (nm, nm_t, ep, is_nan) = train(epochs = epochs,

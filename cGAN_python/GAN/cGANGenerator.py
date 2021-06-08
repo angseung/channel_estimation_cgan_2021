@@ -150,7 +150,8 @@ class GeneratorRev(tf.keras.Model):
         # Resize Input
         p_layer_1 = DecoderLayer(filters=2, kernel_size=4, strides_s=2, apply_dropout=False, add=True)
         p_layer_2 = DecoderLayer(filters=2, kernel_size=4, strides_s=2, apply_dropout=False, add=True)
-        p_layer_3 = EncoderLayer(filters=2, kernel_size=(6, 1), strides_s=(4, 1), apply_batchnorm=False, add=True)
+        p_layer_3 = EncoderLayer(filters=2, kernel_size=(6, 1), strides_s=(4, 1),
+                                 apply_batchnorm=False, add=True)
 
         self.p_layers = [p_layer_1, p_layer_2, p_layer_3]
 
@@ -248,9 +249,13 @@ class GeneratorRev2(tf.keras.Model):
         # (None, 64, 32, 2)
 
         p_layer_4 = EncoderLayer(filters=16, kernel_size=4, strides_s=1)
-        # p_layer_5 = EncoderLayer(filters=32, kernel_size=4, strides_s=1)
+        p_layer_5 = EncoderLayer(filters=32, kernel_size=4, strides_s=1)
 
-        self.p_layers = [p_layer_1, p_layer_2, p_layer_3, p_layer_4]
+        self.p_layers = [p_layer_1,
+                         p_layer_2,
+                         p_layer_3,
+                         p_layer_4,
+                         p_layer_5]
 
         # encoder
         encoder_layer_1 = EncoderLayer(filters=64 * 1, kernel_size=4, apply_batchnorm=False)
