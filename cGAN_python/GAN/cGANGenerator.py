@@ -244,9 +244,13 @@ class GeneratorRev2(tf.keras.Model):
         #                          apply_batchnorm=False, add=True)
         p_layer_3 = EncoderLayer(filters=2, kernel_size=4, strides_s=(4, 1),
                                  apply_batchnorm=False, add=True)
+
         # (None, 64, 32, 2)
 
-        self.p_layers = [p_layer_1, p_layer_2, p_layer_3]
+        p_layer_4 = EncoderLayer(filters=16, kernel_size=4, strides_s=1)
+        # p_layer_5 = EncoderLayer(filters=32, kernel_size=4, strides_s=1)
+
+        self.p_layers = [p_layer_1, p_layer_2, p_layer_3, p_layer_4]
 
         # encoder
         encoder_layer_1 = EncoderLayer(filters=64 * 1, kernel_size=4, apply_batchnorm=False)
