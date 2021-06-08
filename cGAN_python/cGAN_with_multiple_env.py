@@ -6,7 +6,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
 import tensorflow_addons as tfa
 import matplotlib.pyplot as plt
-from GAN.cGANGenerator import Generator, GeneratorRev
+from GAN.cGANGenerator import Generator, GeneratorRev, GeneratorRev2
 from GAN.cGANDiscriminator import Discriminator, DiscriminatorRev
 from GAN.cGANLoss import generator_loss, generator_loss_custom, discriminator_loss_custom, discriminator_loss
 from GAN.data_preprocess import load_image_train, load_image_test, load_image_test_y, load_image_train_batch
@@ -63,7 +63,7 @@ def train_step_custom(input_image, target, l2_weight):
     generator_optimizer.apply_gradients(zip(generator_gradient, generator.trainable_variables))
     discriminator_optimizer.apply_gradients(zip(discriminator_gradient, discriminator.trainable_variables))
 
-    return gen_loss, disc_loss
+    return (gen_loss, disc_loss)
 
 
 # @tf.function
@@ -183,8 +183,8 @@ def train(epochs, l2_weight, DISC_L2_OPT, TRAIN_SHOW_OPE = False):
     return (nm, nm_t, ep, is_nan)
 
 ## Main Script Start...
-l2_weight_list = [10.0]
-lr_gen_list = [0.0001]
+l2_weight_list = [0.0]
+lr_gen_list = [0.001]
 lr_dis_list = [1e-3, 5e-4, 1e-4, 1e-5]
 beta1_list = [0.9]
 # lr_gen_list = [1e-3, 1e-4, 5e-4, 1e-5, 5e-5, 1e-6]
@@ -211,7 +211,7 @@ for l2_weight in l2_weight_list:
                 BATCH_SIZE = 1
 
                 # model
-                generator = GeneratorRev()
+                generator = GeneratorRev2()
                 discriminator = DiscriminatorRev(dropout_rate=dropout_rate)
 
                 # generator = make_generator_model()
@@ -227,7 +227,7 @@ for l2_weight in l2_weight_list:
                     discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-10)
 
                 else:
-                    path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_re_im_chan_210608_v3.mat"
+                    path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_re_im_chan_210608_v4.mat"
                     # optimizer
                     # lr_dis = 1e-3
                     generator_optimizer = tf.compat.v1.train.AdamOptimizer(lr_gen, beta1 = beta1)

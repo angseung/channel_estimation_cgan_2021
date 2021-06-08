@@ -1,7 +1,7 @@
 clc, clear, close all;
 
 %% 전송 파라미터 설정
-fft_len = 8;                % OFDM 부반송파의 수
+fft_len = 32;                % OFDM 부반송파의 수
 mod_type = 2;               % 변조 차수 ex) 1 - BPSK, 2 - QPSK, 4 - 16QAM, 6 - 64QAM, 8 - 256QAM
 rx_node = 1;                % 수신기의 수 (수신기의 안테나는 1개)
 tx_ant = 32;                % 기지국의 안테나 수
@@ -10,7 +10,7 @@ snr = 10;                   % 전송 채널 SNR 범위
 path = 3;
 scatter = 2;
 % iter = 300;               % 전송 반복 횟수
-pilot_len = 8;
+pilot_len = 16;
 % num_datasets = 12000;
 num_datasets = 1548 + 664;
 % num_datasets = 100;
@@ -119,6 +119,6 @@ input_da_test = Y_signed(numTrSamples + 1 : end, : , : ,:);
 output_da_test = CH(numTrSamples + 1 : end, :, :, :);
 
 %% Save Generated Data to mat v7.3 hd5 file...
-formatSpec = "Gan_%d_dBOutdoorSCM_%dpath_%dscatter_re_im_chan_210608_v3.mat";
+formatSpec = "Gan_%d_dBOutdoorSCM_%dpath_%dscatter_re_im_chan_210608_v4.mat";
 fname = sprintf(formatSpec, snr, path, scatter);
 save("Gan_Data\" + fname,'input_da','output_da','input_da_test','output_da_test','-v7.3')
