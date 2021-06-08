@@ -184,7 +184,8 @@ def train(epochs, l2_weight, DISC_L2_OPT, TRAIN_SHOW_OPE = False):
 
 ## Main Script Start...
 l2_weight_list = [10.0]
-lr_gen_list = [0.001]
+lr_gen_list = [0.0001]
+lr_dis_list = [1e-3, 5e-4, 1e-4, 1e-5]
 beta1_list = [0.9]
 # lr_gen_list = [1e-3, 1e-4, 5e-4, 1e-5, 5e-5, 1e-6]
 # beta1_list = [0.9, 0.8, 0.7, 0.6, 0.5]
@@ -205,68 +206,69 @@ DATASET_CUSTUM_OPT = True
 for l2_weight in l2_weight_list:
     for beta1 in beta1_list:
         for lr_gen in lr_gen_list:
+            for lr_dis in lr_dis_list:
 
-            BATCH_SIZE = 1
+                BATCH_SIZE = 1
 
-            # model
-            generator = GeneratorRev()
-            discriminator = DiscriminatorRev(dropout_rate=dropout_rate)
+                # model
+                generator = GeneratorRev()
+                discriminator = DiscriminatorRev(dropout_rate=dropout_rate)
 
-            # generator = make_generator_model()
-            # discriminator = make_discriminator_model()
+                # generator = make_generator_model()
+                # discriminator = make_discriminator_model()
 
-            # data path
-            if (not DATASET_CUSTUM_OPT):
-                path = "../ Data_Generation/Gan_Data/Gan_0_dBIndoor2p4_64ant_32users_8pilot_ori.mat"
-                # optimizer
-                lr_gen = 2e-4
-                lr_dis = 2e-5
-                generator_optimizer = tf.compat.v1.train.AdamOptimizer(lr_gen, beta1=0.5)
-                discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-10)
+                # data path
+                if (not DATASET_CUSTUM_OPT):
+                    path = "../ Data_Generation/Gan_Data/Gan_0_dBIndoor2p4_64ant_32users_8pilot_ori.mat"
+                    # optimizer
+                    lr_gen = 2e-4
+                    lr_dis = 2e-5
+                    generator_optimizer = tf.compat.v1.train.AdamOptimizer(lr_gen, beta1=0.5)
+                    discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-10)
 
-            else:
-                path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_re_im_chan_210607_v2.mat"
-                # optimizer
-                lr_dis = 2e-5
-                generator_optimizer = tf.compat.v1.train.AdamOptimizer(lr_gen, beta1 = beta1)
-                discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-9)
+                else:
+                    path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_re_im_chan_210608_v3.mat"
+                    # optimizer
+                    # lr_dis = 1e-3
+                    generator_optimizer = tf.compat.v1.train.AdamOptimizer(lr_gen, beta1 = beta1)
+                    discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-9)
 
-            # train
-            (nm, nm_t, ep, is_nan) = train(epochs = epochs,
-                                           l2_weight = l2_weight,
-                                           DISC_L2_OPT = DISC_L2_OPT,
-                                           TRAIN_SHOW_OPE = True)
+                # train
+                (nm, nm_t, ep, is_nan) = train(epochs = epochs,
+                                               l2_weight = l2_weight,
+                                               DISC_L2_OPT = DISC_L2_OPT,
+                                               TRAIN_SHOW_OPE = True)
 
-            if (is_nan):
-                print("nan detected... skip for this params...")
-                break
+                if (is_nan):
+                    print("nan detected... skip for this params...")
+                    break
 
-            nm_val_list.append(nm)
+                nm_val_list.append(nm)
 
-            fig_nmse = plt.figure(fig_num, figsize=(10, 10))
-            plt.plot(ep, nm, '^-r', label="Test NMSE")
-            plt.plot(ep, nm_t, '^--g', label="Train NMSE")
+                fig_nmse = plt.figure(fig_num, figsize=(10, 10))
+                plt.plot(ep, nm, '^-r', label="Test NMSE")
+                plt.plot(ep, nm_t, '^--g', label="Train NMSE")
 
-            for x, y in zip(ep, nm):
-                if (x > 9):
-                    plt.text(x, y + 0.5, "%.3f" % y,  # 좌표 (x축 = v, y축 = y[0]..y[1], 표시 = y[0]..y[1])
-                             fontsize=9,
-                             color='black',
-                             horizontalalignment='center',  # horizontalalignment (left, center, right)
-                             verticalalignment='bottom',
-                             rotation=90)  # verticalalignment (top, center, bottom)
+                for x, y in zip(ep, nm):
+                    if (x > 9):
+                        plt.text(x, y + 0.5, "%.3f" % y,  # 좌표 (x축 = v, y축 = y[0]..y[1], 표시 = y[0]..y[1])
+                                 fontsize=9,
+                                 color='black',
+                                 horizontalalignment='center',  # horizontalalignment (left, center, right)
+                                 verticalalignment='bottom',
+                                 rotation=90)  # verticalalignment (top, center, bottom)
 
-            timestr = time.strftime("%Y%m%d_%H%M%S")
-            # plt.text(0, 0, timestr)
+                timestr = time.strftime("%Y%m%d_%H%M%S")
+                # plt.text(0, 0, timestr)
 
-            plt.xlabel('Epoch')
-            plt.ylabel('NMSE (dB)')
-            plt.title("Epoch - NMSE Score, [lr : %.8f] [beta1 : %.3f], [l2_weight : %.8f]"
-                      % (lr_gen, beta1, l2_weight))
-            plt.grid(True)
-            plt.legend(loc='best')
-            # plt.show()
-            # fig_nmse.savefig("fig_temp/nmse_score_%05d_%s" % (fig_num, timestr))
-            fig_nmse.savefig("fig_temp/nmse_score_%s_2epoch" % (timestr))
+                plt.xlabel('Epoch')
+                plt.ylabel('NMSE (dB)')
+                plt.title("Epoch - NMSE Score, [lr_gen : %.8f][lr_dis : %.8f][beta1 : %.3f][l2_weight : %.8f]"
+                          % (lr_gen, lr_dis, beta1, l2_weight))
+                plt.grid(True)
+                plt.legend(loc='best')
+                # plt.show()
+                # fig_nmse.savefig("fig_temp/nmse_score_%05d_%s" % (fig_num, timestr))
+                fig_nmse.savefig("fig_temp/nmse_score_%s_2epoch" % (timestr))
 
-            fig_num = fig_num + 1
+                fig_num = fig_num + 1

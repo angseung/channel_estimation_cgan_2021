@@ -121,7 +121,7 @@ class DiscriminatorRev(tf.keras.Model):
 
         x = self.relu(x)
         x = self.DL(x)
-        x = self.FL(x)
+        # x = self.FL(x)
         # x = self.DS(x)
 
         return x
