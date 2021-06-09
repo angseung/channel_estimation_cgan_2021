@@ -7,7 +7,7 @@ import tensorflow as tf
 import tensorflow_addons as tfa
 import matplotlib.pyplot as plt
 from GAN.cGANGenerator import Generator, GeneratorRev, GeneratorRev2
-from GAN.cGANDiscriminator import Discriminator, DiscriminatorRev
+from GAN.cGANDiscriminator import Discriminator, DiscriminatorRev, DiscriminatorRev2
 from GAN.cGANLoss import generator_loss, generator_loss_custom, discriminator_loss_custom, discriminator_loss
 from GAN.data_preprocess import load_image_train, load_image_test, load_image_test_y, load_image_train_batch
 from GAN.cGANLayers import make_generator_model, make_discriminator_model
@@ -67,7 +67,7 @@ def train_step_custom(input_image, target, l2_weight):
 
 
 # @tf.function
-def train_step(bi, input_image, target, l2_weight, DISC_L2_OPT = False):
+def train_step(bi, input_image, target, l2_weight, DISC_L2_OPT = False, WASSERSTEIN_OPT = False):
     with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
         gen_output = generator(input_image, training=True)  # input -> generated_target
         disc_real_output = discriminator(target, training=True)  # [input, target] -> disc output
@@ -80,12 +80,14 @@ def train_step(bi, input_image, target, l2_weight, DISC_L2_OPT = False):
         gen_loss = generator_loss(disc_generated_output,
                                   gen_output,
                                   target,
-                                  l2_weight)  # gen loss
+                                  l2_weight,
+                                  WASSERSTEIN_OPT = WASSERSTEIN_OPT)  # gen loss
 
         disc_loss = discriminator_loss(disc_real_output,
                                        disc_generated_output,
                                        l2_weight = 1.0,
-                                       L2_OPT = DISC_L2_OPT)  # disc loss
+                                       L2_OPT = DISC_L2_OPT,
+                                       WASSERSTEIN_OPT = WASSERSTEIN_OPT)  # disc loss
 
     # gradient
     generator_gradient = gen_tape.gradient(gen_loss, generator.trainable_variables)
@@ -98,10 +100,15 @@ def train_step(bi, input_image, target, l2_weight, DISC_L2_OPT = False):
     # if ((bi % 2) == 0):
     discriminator_optimizer.apply_gradients(zip(discriminator_gradient, discriminator.trainable_variables))
 
+    # if (bi % 300 == 0):
+    #     fig_H = plt.figure(1e4 + bi, figsize=(7, 7))
+    #     plt.imshow()
+
+
     return (gen_loss, disc_loss)
 
 
-def train(epochs, l2_weight, DISC_L2_OPT, TRAIN_SHOW_OPE = False):
+def train(epochs, l2_weight, DISC_L2_OPT, TRAIN_SHOW_OPE = False, WASSERSTEIN_OPT = False):
     nm = []
     nm_t = []
     ep = []
@@ -116,10 +123,11 @@ def train(epochs, l2_weight, DISC_L2_OPT, TRAIN_SHOW_OPE = False):
             # load_image_train : yields one H and Y...
             elapsed_time = datetime.datetime.now() - start_time
             (gen_loss, disc_loss) = train_step(bi,
-                                             input_image,
-                                             target,
-                                             l2_weight,
-                                             DISC_L2_OPT)
+                                               input_image,
+                                               target,
+                                               l2_weight,
+                                               DISC_L2_OPT,
+                                               WASSERSTEIN_OPT)
 
             is_nan = (tf.math.is_nan(gen_loss)) or (tf.math.is_nan(disc_loss))
 
@@ -209,17 +217,25 @@ path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_re_im_cha
 DATASET_CUSTUM_OPT = True
 # DATASET_CUSTUM_OPT = False
 
+## Loss function opt
+WASSERSTEIN_OPT = True
+
 for l2_weight in l2_weight_list:
     for beta1 in beta1_list:
         for lr_gen in lr_gen_list:
             for lr_dis in lr_dis_list:
 
-                dropout_rate = 0.5
+                dropout_rate = 0.3
                 BATCH_SIZE = 1
 
                 # model
                 generator = GeneratorRev()
-                discriminator = DiscriminatorRev(dropout_rate=dropout_rate)
+
+                if (WASSERSTEIN_OPT):
+                    discriminator = DiscriminatorRev2(dropout_rate=dropout_rate)
+                else:
+                    discriminator = DiscriminatorRev(dropout_rate=dropout_rate)
+
 
                 # generator = make_generator_model()
                 # discriminator = make_discriminator_model()
@@ -247,7 +263,8 @@ for l2_weight in l2_weight_list:
                 (nm, nm_t, ep, is_nan) = train(epochs = epochs,
                                                l2_weight = l2_weight,
                                                DISC_L2_OPT = DISC_L2_OPT,
-                                               TRAIN_SHOW_OPE = True)
+                                               TRAIN_SHOW_OPE = True,
+                                               WASSERSTEIN_OPT = WASSERSTEIN_OPT)
 
                 if (is_nan):
                     print("nan detected... skip for this params...")
