@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import time
+from sys import platform
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
@@ -263,10 +264,14 @@ for l2_weight in l2_weight_list:
                                                                        beta_1 = beta1)
 
                 # train
+                if (platform == 'linux'):
+                    TRAIN_SHOW_OPE = False
+                else:
+                    TRAIN_SHOW_OPE = True
                 (nm, nm_t, ep, is_nan) = train(epochs = epochs,
                                                l2_weight = l2_weight,
                                                DISC_L2_OPT = DISC_L2_OPT,
-                                               TRAIN_SHOW_OPE = True,
+                                               TRAIN_SHOW_OPE = TRAIN_SHOW_OPE,
                                                WASSERSTEIN_OPT = WASSERSTEIN_OPT)
 
                 if (is_nan):
