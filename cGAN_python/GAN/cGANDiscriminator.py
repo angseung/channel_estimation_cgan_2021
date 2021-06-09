@@ -26,8 +26,8 @@ class Discriminator(tf.keras.Model):
         # conv block1
         self.zero_pad1 = layers.ZeroPadding2D()                                
         self.conv = tf.keras.layers.Conv2D(512, 4, strides=1, kernel_initializer=initializer, use_bias=False)
-        # self.bn1 = layers.BatchNormalization()
-        self.bn1 = tfa.layers.InstanceNormalization()
+        self.bn1 = layers.BatchNormalization()
+        # self.bn1 = tfa.layers.InstanceNormalization()
         self.ac = layers.LeakyReLU()
 
         # block2
@@ -76,8 +76,8 @@ class DiscriminatorRev(tf.keras.Model):
         # output : (None, 10, 6, 256)
         self.conv = tf.keras.layers.Conv2D(512, 4, strides=1, kernel_initializer=initializer, use_bias=False)
         # output : (None, 4, 2, 512)
-        # self.bn1 = layers.BatchNormalization()
-        self.bn1 = tfa.layers.InstanceNormalization()
+        self.bn1 = layers.BatchNormalization()
+        # self.bn1 = tfa.layers.InstanceNormalization()
         self.ac = layers.LeakyReLU()
 
         # block2
@@ -149,8 +149,8 @@ class DiscriminatorRev2(tf.keras.Model):
         # output : (None, 10, 6, 256)
         self.conv = tf.keras.layers.Conv2D(512, 4, strides=1, kernel_initializer=initializer, use_bias=False)
         # output : (None, 4, 2, 512)
-        # self.bn1 = layers.BatchNormalization()
-        self.bn1 = tfa.layers.InstanceNormalization()
+        self.bn1 = layers.BatchNormalization()
+        # self.bn1 = tfa.layers.InstanceNormalization()
         self.ac = layers.LeakyReLU()
 
         # block2
@@ -164,8 +164,8 @@ class DiscriminatorRev2(tf.keras.Model):
         ## output
         self.relu = layers.LeakyReLU()
         self.DL = layers.Dropout(rate=dropout_rate)
-        self.FL = layers.Flatten()
-        self.DS = layers.Dense(1, activation="sigmoid")
+        # self.FL = layers.Flatten()
+        # self.DS = layers.Dense(1, activation="sigmoid")
 
     def call(self, y):
         """inputs can be generated image. """
@@ -194,8 +194,8 @@ class DiscriminatorRev2(tf.keras.Model):
 
         x = self.relu(x)
         x = self.DL(x)
-        x = self.FL(x)
-        x = self.DS(x)
+        # x = self.FL(x)
+        # x = self.DS(x)
 
         return x
 

@@ -22,7 +22,8 @@ class EncoderLayer(tf.keras.Model):
                  apply_batchnorm = True,
                  apply_dropout = False,
                  add = False,
-                 padding_s = 'same'):
+                 padding_s = 'same',
+                 RELU_OPT = False):
 
         super(EncoderLayer, self).__init__()
 
@@ -31,20 +32,23 @@ class EncoderLayer(tf.keras.Model):
 
         conv = layers.Conv2D(filters=filters, kernel_size=kernel_size, strides=strides_s,
                              padding=padding_s, kernel_initializer=initializer, use_bias=False)
-        ac = layers.LeakyReLU()
+        if (RELU_OPT):
+            ac = layers.ReLU()
+        else :
+            ac = layers.LeakyReLU(0.2)
         self.encoder_layer = None
 
         if add:
             self.encoder_layer = tf.keras.Sequential([conv])
 
         elif apply_batchnorm:
-            # bn = layers.BatchNormalization()
-            bn = tfa.layers.InstanceNormalization()
+            bn = layers.BatchNormalization()
+            # bn = tfa.layers.InstanceNormalization()
             self.encoder_layer = tf.keras.Sequential([conv, bn, ac])
 
         elif apply_dropout:
-            # bn = layers.BatchNormalization()
-            bn = tfa.layers.InstanceNormalization()
+            bn = layers.BatchNormalization()
+            # bn = tfa.layers.InstanceNormalization()
             drop = layers.Dropout(rate=0.5)
             self.encoder_layer = tf.keras.Sequential([conv, bn, drop, ac])
 
@@ -61,7 +65,8 @@ class DecoderLayer(tf.keras.Model):
                  kernel_size,
                  strides_s = 2,
                  apply_dropout = False,
-                 add = False):
+                 add = False,
+                 RELU_OPT = False):
 
         super(DecoderLayer, self).__init__()
 
@@ -70,9 +75,14 @@ class DecoderLayer(tf.keras.Model):
 
         dconv = layers.Conv2DTranspose(filters=filters, kernel_size=kernel_size, strides=strides_s,
                                        padding='same', kernel_initializer=initializer, use_bias=False)
-        # bn = layers.BatchNormalization()
-        bn = tfa.layers.InstanceNormalization()
-        ac = layers.ReLU()
+        bn = layers.BatchNormalization()
+        # bn = tfa.layers.InstanceNormalization()
+
+        if (RELU_OPT):
+            ac = layers.ReLU()
+        else:
+            ac = layers.LeakyReLU(0.2)
+
         self.decoder_layer = None
         
         if add:
@@ -142,28 +152,30 @@ class Generator(tf.keras.Model):
 
 class GeneratorRev(tf.keras.Model):
     def __init__(self,
-                 n_path = 3):
+                 n_path = 3,
+                 dropout_rate = 0.5):
 
         super(GeneratorRev, self).__init__()
         self.n_path = n_path * 2
 
         # Resize Input
-        p_layer_1 = DecoderLayer(filters=2, kernel_size=4, strides_s=2, apply_dropout=False, add=True)
-        p_layer_2 = DecoderLayer(filters=2, kernel_size=4, strides_s=2, apply_dropout=False, add=True)
-        p_layer_3 = EncoderLayer(filters=2, kernel_size=(6, 1), strides_s=(4, 1), apply_dropout=True, add=True)
+        p_layer_1 = DecoderLayer(filters=2, kernel_size=4, strides_s=2, apply_dropout=False, add=True, RELU_OPT = True)
+        p_layer_2 = DecoderLayer(filters=2, kernel_size=4, strides_s=2, apply_dropout=False, add=True, RELU_OPT = True)
+        p_layer_3 = EncoderLayer(filters=2, kernel_size=(6, 1), strides_s=(4, 1),
+                                 apply_dropout=True, add=True, RELU_OPT = True)
 
         self.p_layers = [p_layer_1, p_layer_2, p_layer_3]
 
         # encoder
-        encoder_layer_1  = EncoderLayer(filters=64 * 1, kernel_size=4, apply_dropout=True)
-        encoder_layer_1n = EncoderLayer(filters=64 * 2, kernel_size=4, strides_s=1)
-        encoder_layer_2  = EncoderLayer(filters=64 * 2, kernel_size=4, apply_dropout=True)
-        encoder_layer_2n = EncoderLayer(filters=64 * 2, kernel_size=4, strides_s=1)
-        encoder_layer_3  = EncoderLayer(filters=64 * 4, kernel_size=4, apply_dropout=True)
-        encoder_layer_3n = EncoderLayer(filters=64 * 4, kernel_size=4, strides_s=1)
-        encoder_layer_4  = EncoderLayer(filters=64 * 8, kernel_size=4, apply_dropout=True)
-        encoder_layer_4n = EncoderLayer(filters=64 * 8, kernel_size=4, strides_s=1)
-        encoder_layer_5  = EncoderLayer(filters=64 * 8, kernel_size=4, apply_dropout=True)
+        encoder_layer_1  = EncoderLayer(filters=64 * 1, kernel_size=4, apply_dropout=True, RELU_OPT = True)
+        encoder_layer_1n = EncoderLayer(filters=64 * 2, kernel_size=4, strides_s=1, RELU_OPT = True)
+        encoder_layer_2  = EncoderLayer(filters=64 * 2, kernel_size=4, apply_dropout=True, RELU_OPT = True)
+        encoder_layer_2n = EncoderLayer(filters=64 * 2, kernel_size=4, strides_s=1, RELU_OPT = True)
+        encoder_layer_3  = EncoderLayer(filters=64 * 4, kernel_size=4, apply_dropout=True, RELU_OPT = True)
+        encoder_layer_3n = EncoderLayer(filters=64 * 4, kernel_size=4, strides_s=1, RELU_OPT = True)
+        encoder_layer_4  = EncoderLayer(filters=64 * 8, kernel_size=4, apply_dropout=True, RELU_OPT = True)
+        encoder_layer_4n = EncoderLayer(filters=64 * 8, kernel_size=4, strides_s=1, RELU_OPT = True)
+        encoder_layer_5  = EncoderLayer(filters=64 * 8, kernel_size=4, apply_dropout=True, RELU_OPT = True)
         self.encoder_layers = [encoder_layer_1,
                                encoder_layer_1n,
                                encoder_layer_2,
@@ -175,14 +187,14 @@ class GeneratorRev(tf.keras.Model):
                                encoder_layer_5]
 
         # decoder
-        decoder_layer_1  = DecoderLayer(filters=64 * 8, kernel_size=4, apply_dropout=True)
-        decoder_layer_1n = DecoderLayer(filters=64 * 8, kernel_size=4, apply_dropout=True, strides_s=1)
-        decoder_layer_2  = DecoderLayer(filters=64 * 4, kernel_size=4, apply_dropout=True)
-        decoder_layer_2n = DecoderLayer(filters=64 * 4, kernel_size=4, apply_dropout=True, strides_s=1)
-        decoder_layer_3  = DecoderLayer(filters=64 * 2, kernel_size=4, apply_dropout=True)
-        decoder_layer_3n = DecoderLayer(filters=64 * 2, kernel_size=4, apply_dropout=True, strides_s=1)
-        decoder_layer_4  = DecoderLayer(filters=64 * 2, kernel_size=4)
-        decoder_layer_4n = DecoderLayer(filters=64 * 1, kernel_size=4, apply_dropout=True, strides_s=1)
+        decoder_layer_1  = DecoderLayer(filters=64 * 8, kernel_size=4, apply_dropout=True, RELU_OPT = True)
+        decoder_layer_1n = DecoderLayer(filters=64 * 8, kernel_size=4, apply_dropout=True, strides_s=1, RELU_OPT = True)
+        decoder_layer_2  = DecoderLayer(filters=64 * 4, kernel_size=4, apply_dropout=True, RELU_OPT = True)
+        decoder_layer_2n = DecoderLayer(filters=64 * 4, kernel_size=4, apply_dropout=True, strides_s=1, RELU_OPT = True)
+        decoder_layer_3  = DecoderLayer(filters=64 * 2, kernel_size=4, apply_dropout=True, RELU_OPT = True)
+        decoder_layer_3n = DecoderLayer(filters=64 * 2, kernel_size=4, apply_dropout=True, strides_s=1, RELU_OPT = True)
+        decoder_layer_4  = DecoderLayer(filters=64 * 2, kernel_size=4, RELU_OPT = True)
+        decoder_layer_4n = DecoderLayer(filters=64 * 1, kernel_size=4, apply_dropout=True, strides_s=1, RELU_OPT = True)
         self.decoder_layers = [decoder_layer_1,
                                decoder_layer_1n,
                                decoder_layer_2,
@@ -194,8 +206,12 @@ class GeneratorRev(tf.keras.Model):
 
         # initializer = tf.keras.initializers.Orthogonal(gain=1.0, seed=None)
         initializer = tf.random_normal_initializer(mean=0., stddev=0.02)
-        self.last = layers.Conv2DTranspose(filters=self.n_path, kernel_size=4, strides=2, padding='same',
-                                           kernel_initializer=initializer, activation='tanh')
+        self.last = layers.Conv2DTranspose(filters=self.n_path,
+                                           kernel_size=4,
+                                           strides=2,
+                                           padding='same',
+                                           kernel_initializer=initializer,
+                                           activation='tanh')
 
     def call(self, x):
         # pass the encoder and record xs

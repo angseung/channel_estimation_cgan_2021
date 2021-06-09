@@ -119,6 +119,6 @@ input_da_test = Y_signed(numTrSamples + 1 : end, : , : ,:);
 output_da_test = CH(numTrSamples + 1 : end, :, :, :);
 
 %% Save Generated Data to mat v7.3 hd5 file...
-formatSpec = "Gan_%d_dBOutdoorSCM_%dpath_%dscatter_re_im_chan_210608_v5.mat";
+formatSpec = "Gan_%d_dBOutdoorSCM_%dpath_%dscatter_re_im_chan_210609_v1.mat";
 fname = sprintf(formatSpec, snr, path, scatter);
 save("Gan_Data\" + fname,'input_da','output_da','input_da_test','output_da_test','-v7.3')

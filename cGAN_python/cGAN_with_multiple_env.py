@@ -198,10 +198,11 @@ def train(epochs, l2_weight, DISC_L2_OPT, TRAIN_SHOW_OPE = False, WASSERSTEIN_OP
 
 ## Main Script Start...
 l2_weight_list = [0.0, 1.0, 5.0, 10.0, 100.0]
-lr_gen_list = [1e-3, 5e-4, 1e-4, 1e-5]
-lr_dis_list = [1e-3, 5e-4, 1e-4, 1e-5]
-beta1_list = [0.9]
-# lr_gen_list = [1e-3, 1e-4, 5e-4, 1e-5, 5e-5, 1e-6]
+# lr_gen_list = [1e-3, 5e-4, 1e-4, 1e-5]
+# lr_dis_list = [1e-3, 5e-4, 1e-4, 1e-5]
+beta1_list = [0.5]
+lr_gen_list = [0.0002]
+lr_dis_list = [0.0002]
 # beta1_list = [0.9, 0.8, 0.7, 0.6, 0.5]
 # l2_weight_list = [0.001]
 # beta1_list = [0.9, 0.8, 0.7, 0.6, 0.5]
@@ -211,25 +212,25 @@ fig_num = 0
 nm_list = np.zeros((len(beta1_list) * len(beta1_list), epochs + 2))
 nm_val_list = []
 DISC_L2_OPT = False
-path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_re_im_chan_210608_v5.mat"
+path = "../Data_Generation/Gan_Data/Gan_10_dBOutdoorSCM_3path_2scatter_re_im_chan_210609_v1.mat"
 
 ## DATASET Option
 DATASET_CUSTUM_OPT = True
 # DATASET_CUSTUM_OPT = False
 
 ## Loss function opt
-WASSERSTEIN_OPT = True
+WASSERSTEIN_OPT = False
 
 for l2_weight in l2_weight_list:
     for beta1 in beta1_list:
         for lr_gen in lr_gen_list:
             for lr_dis in lr_dis_list:
 
-                dropout_rate = 0.3
+                dropout_rate = 0.5
                 BATCH_SIZE = 1
 
                 # model
-                generator = GeneratorRev()
+                generator = GeneratorRev(dropout_rate=dropout_rate)
 
                 if (WASSERSTEIN_OPT):
                     discriminator = DiscriminatorRev2(dropout_rate=dropout_rate)
@@ -255,9 +256,11 @@ for l2_weight in l2_weight_list:
                     # generator_optimizer = tf.compat.v1.train.AdamOptimizer(lr_gen, beta1 = beta1)
                     # discriminator_optimizer = tf.compat.v1.train.RMSPropOptimizer(lr_dis, epsilon=1e-9)
                     generator_optimizer = tf.keras.optimizers.Adam(learning_rate=lr_gen,
-                                                                           beta_1 = beta1)
-                    discriminator_optimizer = tf.keras.optimizers.RMSprop(learning_rate=lr_dis,
-                                                                          epsilon=1e-9)
+                                                                   beta_1 = beta1)
+                    # discriminator_optimizer = tf.keras.optimizers.RMSprop(learning_rate=lr_dis,
+                    #                                                       epsilon=1e-9)
+                    discriminator_optimizer = tf.keras.optimizers.Adam(learning_rate=lr_dis,
+                                                                       beta_1 = beta1)
 
                 # train
                 (nm, nm_t, ep, is_nan) = train(epochs = epochs,
