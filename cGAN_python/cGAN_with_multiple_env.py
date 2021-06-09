@@ -8,12 +8,14 @@ import tensorflow as tf
 import tensorflow_addons as tfa
 import matplotlib.pyplot as plt
 from GAN.cGANGenerator import Generator, GeneratorRev, GeneratorRev2
-from GAN.cGANDiscriminator import Discriminator, DiscriminatorRev, DiscriminatorRev2
+from GAN.cGANDiscriminator import Discriminator, DiscriminatorRev, DiscriminatorRev2, DiscriminatorOri
 from GAN.cGANLoss import generator_loss, generator_loss_custom, discriminator_loss_custom, discriminator_loss
-from GAN.data_preprocess import load_image_train, load_image_test, load_image_test_y, load_image_train_batch
+from GAN.data_preprocess import load_image_train, \
+    load_image_test, load_image_test_y, load_image_train_batch, load_image_train_norm, load_image_train_pre
 from GAN.cGANLayers import make_generator_model, make_discriminator_model
 from tempfile import TemporaryFile
 from scipy.io import loadmat, savemat
+from sklearn.preprocessing import MinMaxScaler
 import datetime
 import h5py
 import hdf5storage
@@ -116,10 +118,14 @@ def train(epochs, l2_weight, DISC_L2_OPT, TRAIN_SHOW_OPE = False, WASSERSTEIN_OP
     start_time = datetime.datetime.now()
     print(os.getcwd())
 
+    ## Preprocessing... Rescale to [-1, 1]
+    Target = load_image_train_pre(path)
+    (H_Max, H_Min) = (Target.max(), Target.min())
+
     for epoch in range(epochs):
         print("-----\nEPOCH:", epoch)
         # train
-        for bi, (target, input_image) in enumerate(load_image_train(path)):
+        for bi, (target, input_image) in enumerate(load_image_train_norm(path, H_Max, H_Min)):
             # bi : index of sample
             # load_image_train : yields one H and Y...
             elapsed_time = datetime.datetime.now() - start_time
@@ -144,9 +150,9 @@ def train(epochs, l2_weight, DISC_L2_OPT, TRAIN_SHOW_OPE = False, WASSERSTEIN_OP
                 #       disc_loss.numpy(), ', time:', elapsed_time)
 
         # generated and see the progress
-        for bii, (tar, inp) in enumerate(load_image_test(path)):
-            if (bii == 100):
-                generated_image(generator, inp, tar, t=epoch + 1)
+        # for bii, (tar, inp) in enumerate(load_image_test(path, H_Max, H_Min)):
+        #     if (bii == 100):
+        #         generated_image(generator, inp, tar, t=epoch + 1)
 
         # save checkpoint
         # if (epoch + 1) % 2 == 0:
@@ -154,7 +160,7 @@ def train(epochs, l2_weight, DISC_L2_OPT, TRAIN_SHOW_OPE = False, WASSERSTEIN_OP
         # generator.save_weights(os.path.join(BASE_PATH, "weights/generator_"+str(epoch)+".h5"))
         # discriminator.save_weights(os.path.join(BASE_PATH, "weights/discriminator_"+str(epoch)+".h5"))
 
-        (realim, inpuim) = load_image_test_y(path)
+        (realim, inpuim) = load_image_test_y(path, H_Max, H_Min)
         prediction = generator(inpuim, training=False)
 
         error_ = np.sum((realim - prediction) ** 2, axis=None)
@@ -162,7 +168,7 @@ def train(epochs, l2_weight, DISC_L2_OPT, TRAIN_SHOW_OPE = False, WASSERSTEIN_OP
         nmse_dB = 10 * np.log10(error_ / real_)
         nm.append(nmse_dB)
 
-        (realim_t, inpuim_t) = load_image_train_batch(path)
+        (realim_t, inpuim_t) = load_image_train_batch(path, H_Max, H_Min)
         prediction_t = generator(inpuim_t, training=False)
 
         error_t = np.sum((realim_t - prediction_t) ** 2, axis=None)
@@ -236,7 +242,8 @@ for l2_weight in l2_weight_list:
                 if (WASSERSTEIN_OPT):
                     discriminator = DiscriminatorRev2(dropout_rate=dropout_rate)
                 else:
-                    discriminator = DiscriminatorRev(dropout_rate=dropout_rate)
+                    # discriminator = DiscriminatorRev(dropout_rate=dropout_rate)
+                    discriminator = Discriminator()
 
 
                 # generator = make_generator_model()
